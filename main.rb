@@ -7,7 +7,9 @@ class Main < Gtk::Window
 		@paned = Gtk::HPaned.new
 		@books = Books.new
 		@paned.pack1(@books, true, true)
+		@paned.position = 150
 		set_title("Gladius 0.1")
+		set_default_size(600, 400)
 
 		@vbox = Gtk::VBox.new
 		@vbox.pack_start(@menubar, false, false, 0)

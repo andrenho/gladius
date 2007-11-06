@@ -6,6 +6,8 @@ class BibleView < Gtk::Frame
 
 		@bible = bible
 
+		vbox = Gtk::VBox.new
+
 		@buffer = Gtk::TextBuffer.new
 
 		@textview = Gtk::TextView.new(@buffer)
