@@ -1,7 +1,7 @@
 class Bible
 
 	def initialize(bible)
-		@db = SQLite3::Database.new("bibles/#{bible}.bible")
+		@db = SQLite3::Database.new("#{BIBLES}/#{bible}.bible")
 	end
 
 	def verse(book, chapter, verse)
