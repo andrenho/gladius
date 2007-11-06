@@ -1,0 +1,17 @@
+To install this package, you need:
+
+  * Ruby
+  * Ruby-GNOME2
+  * SQLLite3-Ruby
+
+The installation is simple. As root, run:
+
+  # ruby install.rb
+
+To install in a custom directory, run:
+
+  # ruby install.rb --share-dir /usr/share/gladius --bin-dir /usr/bin
+
+To uninstall, run:
+
+  # ruby install.rb --uninstall

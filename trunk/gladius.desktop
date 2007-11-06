@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Bibliomori
+GenericName=Library Manager
+Comment=A simple personal library manager
+TryExec=bibliomori
+Exec=bibliomori
+Icon=
+Categories=Utility;Literature;
