@@ -1,8 +1,11 @@
-class BibleView < Gtk::Frame
+class BibleView < Gtk::HPaned
 
 	def initialize(bible)
-		super(nil)
-		shadow_type = Gtk::SHADOW_IN
+		super()
+
+		framebase = Gtk::Frame.new
+		pack1(framebase, true, true)
+		framebase.shadow_type = Gtk::SHADOW_IN
 
 		@bible = bible
 
@@ -16,6 +19,11 @@ class BibleView < Gtk::Frame
 		label.ypad = 2
 		hbox = Gtk::HBox.new
 		hbox.pack_start(label, true, true, 5)
+		close_button = Gtk::Button.new
+		close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
+		close_button.relief = Gtk::RELIEF_NONE
+		close_button.signal_connect('clicked') { close }
+		hbox.pack_start(close_button, false, false)
 		frame.add(hbox)
 		vbox.pack_start(frame, false, false)
 
@@ -30,12 +38,13 @@ class BibleView < Gtk::Frame
 		scroll.add(@textview)
 		vbox.pack_start(scroll)
 
-		add(vbox)
+		framebase.add(vbox)
 
 		go_to(1, 1)
 	end
 
 	def go_to(book, chapter, verse=1)
+		@textview.buffer = nil
 		@buffer.text = ''
 		text = ''
 		while text != nil
@@ -48,6 +57,11 @@ class BibleView < Gtk::Frame
 				verse += 1
 			end
 		end
+		@textview.buffer = @buffer
+	end
+
+	def close
+		$main.delete_view(self)
 	end
 
 end
