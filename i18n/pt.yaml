@@ -1,0 +1,213 @@
+--- 
+- 
+  code: pt-br
+  language: 'Português Brasileiro'
+  email-translator: andre.nho@gmail.com
+  translator: 'André Wagner'
+- 
+  - Genesis
+  - Gênesis
+- 
+  - Exodus
+  - Êxodo
+- 
+  - Leviticus
+  - Levítico
+- 
+  - Numbers
+  - Números
+- 
+  - Deuteronomy
+  - Deutoronômio
+- 
+  - Joshua
+  - Josué
+- 
+  - Judges
+  - Juízes
+- 
+  - Ruth
+  - Rute
+- 
+  - 1 Samuel
+  - 1ª Samuel
+- 
+  - 2 Samuel
+  - 2ª Samuel
+- 
+  - 1 Kings
+  - 1ª Reis
+- 
+  - 2 Kings
+  - 1ª Reis
+- 
+  - 1 Chronicles
+  - 1ª Crônicas
+- 
+  - 2 Chronicles
+  - 2ª Crônicas
+- 
+  - Ezra
+  - Esdras
+- 
+  - Nehemiah
+  - Neemias
+- 
+  - Esther
+  - Ester
+- 
+  - Job
+  - Jó
+- 
+  - Psalms
+  - Salmos
+- 
+  - Proverbs
+  - Provérbios
+- 
+  - Ecclesiastes
+  - Eclesiastes
+- 
+  - Song of Solomon
+  - Cantares
+- 
+  - Isaiah
+  - Isaías
+- 
+  - Jeremiah
+  - Jeremias
+- 
+  - Lamentations
+  - Lamentações
+- 
+  - Ezekiel
+  - Ezequiel
+- 
+  - Daniel
+  - Daniel
+- 
+  - Hosea
+  - Oséias
+- 
+  - Joel
+  - Joel
+- 
+  - Amos
+  - Amós
+- 
+  - Obadiah
+  - Obadias
+- 
+  - Jonah
+  - Jonas
+- 
+  - Micah
+  - Miquéias
+- 
+  - Nahum
+  - Naum
+- 
+  - Habakkuk
+  - Habacuque
+- 
+  - Zephenaiah
+  - Sofonias
+- 
+  - Haggai
+  - Ageu
+- 
+  - Zechariah
+  - Zacarias
+- 
+  - Malachi
+  - Malaquias
+- 
+  - Matthew
+  - Mateus
+- 
+  - Mark
+  - Marcos
+- 
+  - Luke
+  - Lucas
+- 
+  - John
+  - João
+- 
+  - Acts
+  - Atos
+- 
+  - Romans
+  - Romanos
+- 
+  - 1 Corinthians
+  - 1ª Coríntios
+- 
+  - 2 Corinthians
+  - 2ª Coríntios
+- 
+  - Galatians
+  - Gálatas
+- 
+  - Ephesians
+  - Efésios
+- 
+  - Philippians
+  - Filipenses
+- 
+  - Colossians
+  - Colossenses
+- 
+  - 1 Thessalonians
+  - 1ª Tessalonicenses
+- 
+  - 2 Thessalonians
+  - 2ª Tessalonicenses
+- 
+  - 1 Timothy
+  - 1ª Timóteo
+- 
+  - 2 Timothy
+  - 2ª Timóteo
+- 
+  - Titus
+  - Tito
+- 
+  - Philemon
+  - Filemon
+- 
+  - Hebrews
+  - Hebreus
+- 
+  - James
+  - Tiago
+- 
+  - 1 Peter
+  - 1ª Pedro
+- 
+  - 2 Peter
+  - 2ª Pedro
+- 
+  - 1 John
+  - 1 João
+- 
+  - 2 John
+  - 2ª João
+- 
+  - 3 John
+  - 3ª João
+- 
+  - Jude
+  - Judas
+- 
+  - Revelation
+  - Apocalipse
+- 
+  - Book
+  - Livro
+- 
+  - File
+  - Arquivo
+- 
+  - Exit
+  - Sair

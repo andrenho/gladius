@@ -71,7 +71,7 @@ Section "Gladius ${PRODUCT_VERSION}"
 	File "..\src\*.rb"
 
 	SetOutPath $INSTDIR\bibles
-	File "..\bibles\*.bible"
+	File "..\bibles\kjv.bible"
 
 	#
 	# Create initialization files

@@ -70,13 +70,13 @@ rescue LoadError
 	libraries_ok = false
 end
 
-=begin
+begin
 	require 'yaml'
 rescue LoadError
 	$stderr.puts "You need Ruby-Yaml to run this application.\n" +
 		         "You can get it in <http://yaml4r.sourceforge.net/>."
 	libraries_ok = false
-=end
+end
 
 exit if not libraries_ok
 
@@ -134,7 +134,7 @@ require "#{I18N}/i18n"
 load_language
 
 Gtk.init
-$default_bible = Bible.new('ptbr-jfa')
+$default_bible = Bible.new('kjv')
 $main = Main.new
 $main.show_all
 Gtk.main

@@ -11,10 +11,11 @@ class ImportUnbound
 		db.execute "INSERT INTO info ( content, variable ) VALUES ( 'name', '#{name}' )"
 		db.execute "INSERT INTO info ( content, variable ) VALUES ( 'charset', '#{charset}' )"
 
-		file = File.new(file)
+		lines = IO.readlines(file)
+		db.transaction
 		db.prepare("INSERT INTO bible ( book, chapter, verse, text ) VALUES ( ?, ?, ?, ? )") do |stmt|
-			file.each_line do |line|
-				x = line.scan(/([0-9]+)(.)\t([0-9]+)\t([0-9]+)\t\t([0-9]+)\t(.*)/)
+			lines.each do |line|
+				x = line.chop.scan(/([0-9]+)(.)\t([0-9]+)\t([0-9]+)\t\t([0-9]+)\t(.*)/)
 				book, testament, chapter, verse, order, text = x[0]
 			
 				if testament == 'O' or testament == 'N'
@@ -22,6 +23,7 @@ class ImportUnbound
 				end
 			end
 		end
+		db.commit
 		db.execute "vacuum"
 	end
 

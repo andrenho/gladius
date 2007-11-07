@@ -72,6 +72,9 @@ def create(language)
 			line.scan(/_\(\"(.*?)\".*?\)/) do |match|
 				match.each { |m| body << [ m, nil ] }
 			end
+			line.scan(/_\(\'(.*?)\'.*?\)/) do |match|
+				match.each { |m| body << [ m, nil ] }
+			end
 		end
 	end
 
