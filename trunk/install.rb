@@ -2,7 +2,7 @@
 
 require 'getoptlong'
 
-share_dir = '/usr/local/share/bibliomori'
+share_dir = '/usr/local/share/gladius'
 bin_dir = '/usr/local/bin'
 man_dir = '/usr/local/share/man'
 uninstall = false
@@ -83,7 +83,7 @@ end
 #
 if OS == :win32
 	$stderr.puts "This installer is not meant for Win32. To use this application in Win32, " +
-				 "just execute 'ruby bibliomori.rb'."
+				 "just execute 'ruby gladius.rb'."
 	exit
 end
 
@@ -95,9 +95,9 @@ if ENV['USER'] != nil and ENV['USER'] != 'root'
 end
 
 if uninstall
-	`rm -rf #{share_dir}/bibliomori`
-	`rm #{bin_dir}/bibliomori`
-	`rm #{man_dir}/man1/bibliomori.*`
+	`rm -rf #{share_dir}/gladius`
+	`rm #{bin_dir}/gladius`
+	#`rm #{man_dir}/man1/gladius.*`
 	puts "Uninstall complete."
 	exit
 end
@@ -108,13 +108,6 @@ end
 #
 # Load libraries
 #
-#begin
-#	require 'gtk2'
-#rescue LoadError
-#	$stderr.puts "WARNING: You need the Ruby-GNOME2 libraries to run this application.\n" +
-#				 "You can get them in <http://ruby-gnome2.sourceforge.jp/>."
-#end
-#require 'libglade2'
 
 $swig_runtime_data_type_pointer2 = nil # Satisfy SQLite3
 begin
@@ -135,14 +128,13 @@ end
 # Install!!!
 #
 print 'Installing... '
-['bookimgs', 'src', 'img', 'glade', 'i18n'].each do |dir|
+['bibles', 'src', 'img', 'i18n'].each do |dir|
 	`mkdir -p #{share_dir}/#{dir}`
 	`cp #{dir}/* #{share_dir}/#{dir}/`
 end
 `cp version.txt #{share_dir}/`
-`cp db/bibliomori.db #{share_dir}/`
-`cp man/man1/bibliomori.1 #{man_dir}/man1/`
-`sed 's!SHARE = "."!SHARE = "#{share_dir}"!' bibliomori.rb > #{bin_dir}/bibliomori`
+#`cp man/man1/gladius.1 #{man_dir}/man1/`
+`sed 's!SHARE = "."!SHARE = "#{share_dir}"!' gladius.rb > #{bin_dir}/gladius`
 `echo "SHARE = '#{share_dir}'" > #{share_dir}/src/config.rb`
-`chmod 755 #{bin_dir}/bibliomori`
+`chmod 755 #{bin_dir}/gladius`
 puts 'ok.' # TODO - check if the installation was really sucessful.

@@ -8,8 +8,9 @@ class Main < Gtk::Window
 		@books = Books.new
 		@paned.pack1(@books, true, true)
 		@paned.position = 150
-		set_title("Gladius 0.1")
+		set_title("Gladius #{BB_VERSION}") # TODO get from file
 		set_default_size(600, 400)
+		set_icon("#{IMG}/stock_book_yellow-16.png")
 
 		@vbox = Gtk::VBox.new
 		@vbox.pack_start(@menubar, false, false, 0)
@@ -19,15 +20,22 @@ class Main < Gtk::Window
 
 		@bibleviews = []
 		add_bibleview($default_bible)
+
+		signal_connect('destroy') do 
+			Gtk.main_quit
+		end
 	end
 
 	def create_menu
 		@menubar = Gtk::MenuBar.new
 
 		file_menu = Gtk::Menu.new
-		file = Gtk::MenuItem.new("File")
-		file_menu.append(file_exit = Gtk::MenuItem.new("Exit"))
+		file = Gtk::MenuItem.new(_('File'))
 		file.set_submenu(file_menu)
+
+		file_exit = Gtk::MenuItem.new(_('Exit'))
+		file_exit.signal_connect('activate') { Gtk.main_quit }
+		file_menu.append(file_exit)
 
 		@menubar.append(file)
 	end

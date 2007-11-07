@@ -4,20 +4,20 @@ class Books < Gtk::Frame
 		super
 
 		@books = [
-			'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
-			'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
-			'1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles',
-			'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs',
-			'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah',
-			'Lamentations', 'Ezekiel', 'Daniel', 'Hosea', 'Joel',
-			'Amos', 'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk',
-			'Zephenaiah', 'Haggai', 'Zechariah', 'Malachi', 
-			'Matthew', 'Mark', 'Luke', 'John', 'Acts',
-			'Romans', '1 Corinthians', '2 Corinthians', 'Galatians',
-			'Ephesians', 'Philippians', 'Colossians', '1 Thessalonians',
-			'2 Thessalonians', '1 Timothy', '2 Timothy', 'Titus',
-			'Philemon', 'Hebrews', 'James', '1 Peter', '2 Peter',
-			'1 John', '2 John', '3 John', 'Jude', 'Revelation'
+			_('Genesis'), _('Exodus'), _('Leviticus'), _('Numbers'), _('Deuteronomy'),
+			_('Joshua'), _('Judges'), _('Ruth'), _('1 Samuel'), _('2 Samuel'),
+			_('1 Kings'), _('2 Kings'), _('1 Chronicles'), _('2 Chronicles'),
+			_('Ezra'), _('Nehemiah'), _('Esther'), _('Job'), _('Psalms'), _('Proverbs'),
+			_('Ecclesiastes'), _('Song of Solomon'), _('Isaiah'), _('Jeremiah'),
+			_('Lamentations'), _('Ezekiel'), _('Daniel'), _('Hosea'), _('Joel'),
+			_('Amos'), _('Obadiah'), _('Jonah'), _('Micah'), _('Nahum'), _('Habakkuk'),
+			_('Zephenaiah'), _('Haggai'), _('Zechariah'), _('Malachi'), 
+			_('Matthew'), _('Mark'), _('Luke'), _('John'), _('Acts'),
+			_('Romans'), _('1 Corinthians'), _('2 Corinthians'), _('Galatians'),
+			_('Ephesians'), _('Philippians'), _('Colossians'), _('1 Thessalonians'),
+			_('2 Thessalonians'), _('1 Timothy'), _('2 Timothy'), _('Titus'),
+			_('Philemon'), _('Hebrews'), _('James'), _('1 Peter'), _('2 Peter'),
+			_('1 John'), _('2 John'), _('3 John'), _('Jude'), _('Revelation')
 		]
 		@n_chapters = [50, 50, 27, 36, 34, 24, 21, 4, 31, 24, 22, 25, 29,
 			36, 10, 13, 10, 42, 150, 31, 12, 8, 66, 52, 5, 48, 12, 14, 3,
@@ -33,13 +33,14 @@ class Books < Gtk::Frame
 				child = treestore.append(parent)
 				child[0] = n.to_s
 			end
+			i += 1
 		end
 
 		view = Gtk::TreeView.new(treestore)
 		
 		renderer = Gtk::CellRendererText.new
 
-		col = Gtk::TreeViewColumn.new("Book", renderer, :text => 0)
+		col = Gtk::TreeViewColumn.new(_('Book'), renderer, :text => 0)
 		view.append_column(col)
 
 		view.signal_connect("row-activated") do |view, path, column|
