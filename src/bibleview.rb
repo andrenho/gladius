@@ -44,6 +44,8 @@ class BibleView < Gtk::HPaned
 	end
 
 	def go_to(book, chapter, verse=1)
+		tag = @buffer.create_tag('selected', { :background => "Blue" })
+
 		@textview.buffer = nil
 		@buffer.text = ''
 		text = ''
@@ -52,7 +54,11 @@ class BibleView < Gtk::HPaned
 			if text != nil
 				@buffer.insert_at_cursor(verse.to_s)
 				@buffer.insert_at_cursor('. ')
-				@buffer.insert_at_cursor(text)
+				if verse == 1
+					@buffer.insert(@buffer.end_iter, text, 'selected')
+				else
+					@buffer.insert_at_cursor(text)
+				end
 				@buffer.insert_at_cursor("\n")
 				verse += 1
 			end
