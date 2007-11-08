@@ -2,10 +2,11 @@ require 'ftools'
 
 class Main < Gtk::Window
 
+	attr_reader :current_book, :current_chapter, :current_verse
+
 	def initialize
 		super
 	
-		create_menu
 		@paned = Gtk::HPaned.new
 		@books = Books.new
 		@paned.pack1(@books, true, true)
@@ -15,21 +16,27 @@ class Main < Gtk::Window
 		set_icon("#{IMG}/stock_book_yellow-16.png")
 
 		@vbox = Gtk::VBox.new
-		@vbox.pack_start(@menubar, false, false, 0)
-		@vbox.pack_start(@paned, true, true, 0)
+		@vbox.pack_end(@paned, true, true, 0)
 		add(@vbox)
+
+		@menubar = Gtk::MenuBar.new
 
 		@bibleviews = []
 		add_bibleview($default_bible)
 
+		create_menu
+		@vbox.pack_start(@menubar, false, false, 0)
+
 		signal_connect('destroy') do 
 			Gtk.main_quit
 		end
+
+		go_to(1, 1)
+		select_verse(1)
 	end
 
 	def create_menu
-		@menubar = Gtk::MenuBar.new
-
+		# @menubar.each { |menu_item| @menubar.remove(menu_item) }
 		file_menu = Gtk::Menu.new
 		file = Gtk::MenuItem.new(_('File'))
 		file.set_submenu(file_menu)
@@ -42,40 +49,50 @@ class Main < Gtk::Window
 		view = Gtk::MenuItem.new(_('View'))
 		view.set_submenu(view_menu)
 
-		bible_menu = Gtk::Menu.new
+		@bible_menu = Gtk::Menu.new
 		bible = Gtk::MenuItem.new(_('Bible translations'))
-		bible.set_submenu(bible_menu)
+		bible.set_submenu(@bible_menu)
 		view_menu.append(bible)
 
 		# Add bible translations
-		Dir["#{BIBLES}/*.bible"].each do |f|
-			if not f.include? 'default.bible'
-				item = Gtk::ImageMenuItem.new(Bible.name(f))
-				case Bible.language(f)
-				when 'en'
-					item.image = Gtk::Image.new("#{IMG}/gb.gif")
-				when 'pt-Br'
-					item.image = Gtk::Image.new("#{IMG}/br.gif")
-				end
-				item.signal_connect('activate') do
-					b = Bible.new(f.scan(/.*\/(.*)\.bible/)[0][0])
-					add_bibleview(b)
-				end
-				bible_menu.append(item)
-			end
-		end
-		bible_menu.append(Gtk::SeparatorMenuItem.new)
-		bible_add = Gtk::MenuItem.new(_('Add from file..'))
+		@bible_menu.append(Gtk::SeparatorMenuItem.new)
+		bible_add = Gtk::MenuItem.new(_('Install...'))
 		bible_add.signal_connect('activate') do
 			add_new_bible(file)
-			create_menu
 		end
-		bible_menu.append(bible_add)
+		@bible_menu.append(bible_add)
+		Dir["#{BIBLES}/*.bible"].each do |f|
+			add_bible_to_menu(f) if not f.include? 'default.bible'
+		end
 
 		@menubar.append(file)
 		@menubar.append(view)
 	end
 	private :create_menu
+
+	def add_bible_to_menu(f)
+		bible_name = Bible.name(f)
+		item = Gtk::ImageMenuItem.new(bible_name)
+		case Bible.language(f)
+		when 'en'
+			item.image = Gtk::Image.new("#{IMG}/gb.gif")
+		when 'pt-Br'
+			item.image = Gtk::Image.new("#{IMG}/br.gif")
+		end
+		item.signal_connect('activate') do |widget|
+			b = Bible.new(f.scan(/.*\/(.*)\.bible/)[0][0])
+			bibleview = add_bibleview(b)
+			bibleview.menu_item = widget
+			bibleview.menu_item.sensitive = false
+		end
+		@bible_menu.insert(item, @bible_menu.children.length - 2)
+		if $default_bible.name == bible_name
+			@bibleviews[0].menu_item = item
+			@bibleviews[0].menu_item.sensitive = false
+		end
+		item.show
+	end
+	private :add_bible_to_menu
 
 	def add_bibleview(bible)
 		bibleview = BibleView.new(bible)
@@ -86,6 +103,7 @@ class Main < Gtk::Window
 			show_all
 		end
 		@bibleviews << bibleview
+		return bibleview
 	end
 
 	def delete_view(view)
@@ -103,8 +121,15 @@ class Main < Gtk::Window
 		view.destroy
 	end
 
-	def go_to(book, chapter, verse=1)
-		@bibleviews.each { |bv| bv.go_to(book, chapter, verse) }
+	def go_to(book, chapter)
+		@current_book = book
+		@current_chapter = chapter
+		@bibleviews.each { |bv| bv.go_to(book, chapter) }
+	end
+
+	def select_verse(verse)
+		@current_verse = verse
+		views.each { |bv| bv.select_verse(verse) }
 	end
 
 	def views
@@ -136,6 +161,7 @@ class Main < Gtk::Window
 				File.copy file, "#{BIBLES}/"
 				b = Bible.new(file.scan(/.*[\/\\](.*)\.bible/)[0][0])
 				add_bibleview(b)
+				add_bible_to_menu(file)
 			end
 		end
 		dialog.destroy

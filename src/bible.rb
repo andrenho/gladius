@@ -5,7 +5,7 @@ class Bible
 	end
 
 	def verse(book, chapter, verse)
-		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter=#{chapter} AND verse=#{verse}")
+		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
 	end
 
 	def name
