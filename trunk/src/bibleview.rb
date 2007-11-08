@@ -1,5 +1,8 @@
 class BibleView < Gtk::HPaned
 
+	attr_reader :bible
+	attr_accessor :menu_item
+
 	def initialize(bible)
 		super()
 
@@ -38,36 +41,70 @@ class BibleView < Gtk::HPaned
 		scroll.add(@textview)
 		vbox.pack_start(scroll)
 
+		@tags = []
+		(1..90).each do |n|
+			@tags[n] = @buffer.create_tag("verse#{n}", {
+			    :background_full_height => true,
+			})
+		end
+		@last_verse = 1
+
+		@buffer.signal_connect('mark-set') do |w, iter, mark|
+			if iter.tags != []
+				n = @tags.index(iter.tags[0])
+				$main.select_verse(n)
+			end
+		end
+
 		framebase.add(vbox)
 
-		go_to(1, 1)
+		begin
+			verse = $main.current_verse
+			go_to($main.current_book, $main.current_chapter)
+			select_verse(verse)
+			$main.select_verse(verse)
+		rescue
+		end
 	end
 
-	def go_to(book, chapter, verse=1)
-		tag = @buffer.create_tag('selected', { :background => "Blue" })
-
-		@textview.buffer = nil
-		@buffer.text = ''
+	def go_to(book, chapter)
+		@marks = []
+		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		text = ''
+		iter = @buffer.start_iter
+		verse = 1
 		while text != nil
 			text = @bible.verse(book, chapter, verse)
 			if text != nil
-				@buffer.insert_at_cursor(verse.to_s)
-				@buffer.insert_at_cursor('. ')
-				if verse == 1
-					@buffer.insert(@buffer.end_iter, text, 'selected')
-				else
-					@buffer.insert_at_cursor(text)
-				end
-				@buffer.insert_at_cursor("\n")
+				@marks[verse] = @buffer.create_mark(nil, iter, true)
+				@buffer.insert(iter, verse.to_s)
+				@buffer.insert(iter, '. ')
+				@buffer.insert(iter, text, @tags[verse])
+				@buffer.insert(iter, "\n", @tags[verse])
 				verse += 1
 			end
 		end
-		@textview.buffer = @buffer
+		begin
+			$main.select_verse(1)
+		rescue; end
+	end
+
+	def select_verse(verse)
+		if @last_verse > 0
+			@tags[@last_verse].background_set = false
+			@tags[@last_verse].paragraph_background_set = false
+		end
+		@tags[verse].background_set = true
+		@tags[verse].background = '#D0FFFF'
+		@tags[verse].paragraph_background = '#D0FFFF'
+		@tags[verse].paragraph_background_set = true
+		@last_verse = verse
+		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
 	end
 
 	def close
 		$main.delete_view(self)
+		@menu_item.sensitive = true
 	end
 
 end

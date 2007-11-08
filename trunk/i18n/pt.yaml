@@ -1,15 +1,27 @@
 --- 
 - 
+  language: Português Brasileiro
   code: pt-br
-  language: 'Português Brasileiro'
   email-translator: andre.nho@gmail.com
-  translator: 'André Wagner'
+  translator: André Wagner
+- 
+  - View
+  - Visualizar
+- 
+  - Bible translations
+  - Traduções da Bíblia
+- 
+  - Install...
+  - Instalar...
+- 
+  - File %s is not a valid Bible file.
+  - Arquivo %s não é um arquivo de Bíblia válido.
 - 
   - Genesis
   - Gênesis
 - 
   - Exodus
-  - Êxodo
+  - "Êxodo"
 - 
   - Leviticus
   - Levítico

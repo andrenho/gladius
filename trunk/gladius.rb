@@ -134,7 +134,7 @@ require "#{I18N}/i18n"
 load_language
 
 Gtk.init
-$default_bible = Bible.new('ptbr-jfa')
+$default_bible = Bible.new('kjv') #('ptbr-jfa')
 $main = Main.new
 $main.show_all
 Gtk.main
