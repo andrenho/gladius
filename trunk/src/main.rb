@@ -31,6 +31,11 @@ class Main < Gtk::Window
 			Gtk.main_quit
 		end
 
+		@paned.show
+		@books.show_all
+		@vbox.show
+		@menubar.show_all
+
 		go_to(1, 1)
 		select_verse(1)
 	end
@@ -100,7 +105,7 @@ class Main < Gtk::Window
 			@paned.pack2(bibleview, true, true)
 		else
 			views.last.pack2(bibleview, true, true)
-			show_all
+			bibleview.show
 		end
 		@bibleviews << bibleview
 		return bibleview

@@ -22,13 +22,26 @@ class BibleView < Gtk::HPaned
 		label.ypad = 2
 		hbox = Gtk::HBox.new
 		hbox.pack_start(label, true, true, 5)
+
+		# Search button
+		@search_button = Gtk::ToggleButton.new
+		@search_button.add(Gtk::Image.new(Gtk::Stock::FIND, Gtk::IconSize::MENU))
+		@search_button.relief = Gtk::RELIEF_NONE
+		hbox.pack_start(@search_button, false, false)
+
+		# Close button
 		close_button = Gtk::Button.new
 		close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
 		close_button.relief = Gtk::RELIEF_NONE
 		close_button.signal_connect('clicked') { close }
 		hbox.pack_start(close_button, false, false)
 		frame.add(hbox)
+
+		# Search menu
+		create_search_frame
+
 		vbox.pack_start(frame, false, false)
+		vbox.pack_start(@search_frame, false, false)
 
 		# text buffer
 		@buffer = Gtk::TextBuffer.new
@@ -42,7 +55,7 @@ class BibleView < Gtk::HPaned
 		vbox.pack_start(scroll)
 
 		@tags = []
-		(1..90).each do |n|
+		(1..176).each do |n|
 			@tags[n] = @buffer.create_tag("verse#{n}", {
 			    :background_full_height => true,
 			})
@@ -57,6 +70,9 @@ class BibleView < Gtk::HPaned
 		end
 
 		framebase.add(vbox)
+		
+		show_all
+		@search_frame.visible = false
 
 		begin
 			verse = $main.current_verse
@@ -105,6 +121,34 @@ class BibleView < Gtk::HPaned
 	def close
 		$main.delete_view(self)
 		@menu_item.sensitive = true
+	end
+
+	def create_search_frame
+		@search_frame = Gtk::Frame.new
+		@search_button.signal_connect('toggled') { @search_frame.visible = @search_button.active? }
+		@search_frame.shadow_type = Gtk::SHADOW_OUT
+		search_hbox = Gtk::HBox.new
+
+		# label
+		search_label = Gtk::Label.new(_('Search'))
+		search_label.set_alignment(0, 0.5)
+		search_label.ypad = 2
+		search_hbox.pack_start(search_label, false, false, 5)
+
+		# search entry
+		search_entry = Gtk::Entry.new
+		search_entry.width_chars = 10
+		search_hbox.pack_start(search_entry, false, false, 5)
+
+		# all words/any words/exact phrase
+
+		# partial match
+
+		# range
+
+		@search_frame.add(search_hbox)
+		search_hbox.show_all
+		@search_frame.visible = false
 	end
 
 end
