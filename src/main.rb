@@ -6,6 +6,8 @@ class Main < Gtk::Window
 
 	def initialize
 		super
+
+		$tip = Gtk::Tooltips.new
 	
 		@paned = Gtk::HPaned.new
 		@books = Books.new

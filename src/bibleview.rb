@@ -27,6 +27,7 @@ class BibleView < Gtk::HPaned
 		@search_button = Gtk::ToggleButton.new
 		@search_button.add(Gtk::Image.new(Gtk::Stock::FIND, Gtk::IconSize::MENU))
 		@search_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(@search_button, _('Search'), nil)
 		hbox.pack_start(@search_button, false, false)
 
 		# Close button
@@ -34,6 +35,7 @@ class BibleView < Gtk::HPaned
 		close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
 		close_button.relief = Gtk::RELIEF_NONE
 		close_button.signal_connect('clicked') { close }
+		$tip.set_tip(close_button, _('Close this frame'), nil)
 		hbox.pack_start(close_button, false, false)
 		frame.add(hbox)
 
@@ -137,14 +139,42 @@ class BibleView < Gtk::HPaned
 
 		# search entry
 		search_entry = Gtk::Entry.new
-		search_entry.width_chars = 10
+		search_entry.width_chars = 18
 		search_hbox.pack_start(search_entry, false, false, 5)
+		$tip.set_tip(search_entry, _('Type the search term here'), nil)
 
-		# all words/any words/exact phrase
+		# match menu
+		match_menu = Gtk::Menu.new
+		match_menu.append(exact = Gtk::RadioMenuItem.new(_('Exact phrase')))
+		match_menu.append(all_words = Gtk::RadioMenuItem.new(exact, _('All words')))
+		match_menu.append(any_words = Gtk::RadioMenuItem.new(exact, _('Any words')))
+		match_menu.show_all
+		exact.active = true
+
+		# match
+		match_button = Gtk::Button.new
+		match_button.add(Gtk::Image.new(Gtk::Stock::DND_MULTIPLE, Gtk::IconSize::MENU))
+		match_button.relief = Gtk::RELIEF_NONE
+		match_button.signal_connect('clicked') do 
+			match_menu.popup(nil, nil, 0, 0)
+		end
+		search_hbox.pack_start(match_button, false, false, 0)
+		$tip.set_tip(match_button, _('How the search matches the string typed by the user'), nil)
 
 		# partial match
+		partial_button = Gtk::ToggleButton.new
+		partial_button.add(Gtk::Image.new(Gtk::Stock::FIND_AND_REPLACE, Gtk::IconSize::MENU))
+		partial_button.relief = Gtk::RELIEF_NONE
+		partial_button.active = true
+		search_hbox.pack_start(partial_button, false, false, 0)
+		$tip.set_tip(partial_button, _('Partial match'), nil)
 
 		# range
+		range_button = Gtk::Button.new(_('All'))
+		range_button.relief = Gtk::RELIEF_NONE
+		range_button.signal_connect('clicked') {  }
+		search_hbox.pack_start(range_button, false, false, 0)
+		$tip.set_tip(range_button, 'Range of the search', nil)
 
 		@search_frame.add(search_hbox)
 		search_hbox.show_all
