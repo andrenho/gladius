@@ -1,7 +1,7 @@
 #
 # Set version
 #
-!define PRODUCT_VERSION "0.0.1"
+!define PRODUCT_VERSION "0.0.4"
 
 #
 # Set compressor
@@ -37,7 +37,7 @@ Name "Gladius"
 #DirText "Choose a installation path"
 InstallDir $PROGRAMFILES\Gladius
 
-OutFile "Gladius-win32-${PRODUCT_VERSION}.exe"
+OutFile "gladius-win32-${PRODUCT_VERSION}.exe"
 
 ShowInstDetails show
 ShowUnInstDetails show
