@@ -1,49 +1,23 @@
-class BibleView < Gtk::HPaned
+class BibleView < View
 
 	attr_reader :bible
 	attr_accessor :menu_item
 
 	def initialize(bible)
-		super()
-
-		framebase = Gtk::Frame.new
-		pack1(framebase, true, true)
-		framebase.shadow_type = Gtk::SHADOW_IN
-
+		super(bible.name)
 		@bible = bible
-
-		vbox = Gtk::VBox.new
-
-		# title
-		frame = Gtk::Frame.new
-		frame.shadow_type = Gtk::SHADOW_OUT
-		label = Gtk::Label.new(@bible.name)
-		label.set_alignment(0, 0.5)
-		label.ypad = 2
-		hbox = Gtk::HBox.new
-		hbox.pack_start(label, true, true, 5)
 
 		# Search button
 		@search_button = Gtk::ToggleButton.new
 		@search_button.add(Gtk::Image.new(Gtk::Stock::FIND, Gtk::IconSize::MENU))
 		@search_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(@search_button, _('Search'), nil)
-		hbox.pack_start(@search_button, false, false)
-
-		# Close button
-		close_button = Gtk::Button.new
-		close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
-		close_button.relief = Gtk::RELIEF_NONE
-		close_button.signal_connect('clicked') { close }
-		$tip.set_tip(close_button, _('Close this frame'), nil)
-		hbox.pack_start(close_button, false, false)
-		frame.add(hbox)
+		@hbox.pack_start(@search_button, false, false)
 
 		# Search menu
 		create_search_frame
 
-		vbox.pack_start(frame, false, false)
-		vbox.pack_start(@search_frame, false, false)
+		@vbox.pack_start(@search_frame, false, false)
 
 		# text buffer
 		@buffer = Gtk::TextBuffer.new
@@ -54,7 +28,7 @@ class BibleView < Gtk::HPaned
 		@textview.modify_font(Pango::FontDescription.new('Serif 12'))
 		scroll = Gtk::ScrolledWindow.new
 		scroll.add(@textview)
-		vbox.pack_start(scroll)
+		@vbox.pack_start(scroll)
 
 		@tags = []
 		(1..176).each do |n|
@@ -71,8 +45,6 @@ class BibleView < Gtk::HPaned
 			end
 		end
 
-		framebase.add(vbox)
-		
 		show_all
 		@search_frame.visible = false
 
@@ -120,11 +92,6 @@ class BibleView < Gtk::HPaned
 		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
 	end
 
-	def close
-		$main.delete_view(self)
-		@menu_item.sensitive = true
-	end
-
 	def create_search_frame
 		@search_frame = Gtk::Frame.new
 		@search_button.signal_connect('toggled') { @search_frame.visible = @search_button.active? }
@@ -169,16 +136,55 @@ class BibleView < Gtk::HPaned
 		search_hbox.pack_start(partial_button, false, false, 0)
 		$tip.set_tip(partial_button, _('Partial match'), nil)
 
-		# range
+		# range menu
 		range_button = Gtk::Button.new(_('All'))
+		range_menu = Gtk::Menu.new
+		range_menu.append(all = Gtk::RadioMenuItem.new(_('All')))
+		range_menu.append(pentateuch = Gtk::RadioMenuItem.new(all, _('Pentateuch')))
+		range_menu.append(ot_historicals = Gtk::RadioMenuItem.new(all, _('OT Historicals')))
+		range_menu.append(ot_wisdom = Gtk::RadioMenuItem.new(all, _('OT Wisdom')))
+		range_menu.append(prophets = Gtk::RadioMenuItem.new(all, _('Prophets')))
+		range_menu.append(gospels = Gtk::RadioMenuItem.new(all, _('Gospels')))
+		range_menu.append(acts = Gtk::RadioMenuItem.new(all, _('Acts')))
+		range_menu.append(epistols = Gtk::RadioMenuItem.new(all, _('Epistols')))
+		range_menu.append(revelation = Gtk::RadioMenuItem.new(all, _('Revelation')))
+		range_menu.show_all
+		all.active = true
+		[all, pentateuch, ot_historicals, ot_wisdom, prophets,
+		gospels, acts, epistols, revelation].each do |item|
+			item.signal_connect('toggled') do |w|
+				range_button.label = w.child.text
+			end
+		end
+
+		# range
 		range_button.relief = Gtk::RELIEF_NONE
-		range_button.signal_connect('clicked') {  }
+		range_button.signal_connect('clicked') do 
+			range_menu.popup(nil, nil, 0, 0)
+		end
 		search_hbox.pack_start(range_button, false, false, 0)
 		$tip.set_tip(range_button, 'Range of the search', nil)
+
+		# entry event
+		search_entry.signal_connect('activate') do 
+			text = search_entry.text
+			if text != ''
+				m = Search::EXACT if exact.active?
+				m = Search::ALL_WORDS if all_words.active?
+				m = Search::ANY_WORDS if any_words.active?
+				$main.search(bible, text, m, partial_button.active?, Search::ALL)
+			end
+		end
 
 		@search_frame.add(search_hbox)
 		search_hbox.show_all
 		@search_frame.visible = false
+	end
+
+	def close
+		if super 
+			@menu_item.sensitive = true
+		end
 	end
 
 end

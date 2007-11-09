@@ -23,7 +23,7 @@ class Main < Gtk::Window
 
 		@menubar = Gtk::MenuBar.new
 
-		@bibleviews = []
+		@views = []
 		add_bibleview($default_bible)
 
 		create_menu
@@ -94,8 +94,8 @@ class Main < Gtk::Window
 		end
 		@bible_menu.insert(item, @bible_menu.children.length - 2)
 		if $default_bible.name == bible_name
-			@bibleviews[0].menu_item = item
-			@bibleviews[0].menu_item.sensitive = false
+			@views[0].menu_item = item
+			@views[0].menu_item.sensitive = false
 		end
 		item.show
 	end
@@ -103,46 +103,54 @@ class Main < Gtk::Window
 
 	def add_bibleview(bible)
 		bibleview = BibleView.new(bible)
-		if views == []
+		if @views == []
 			@paned.pack2(bibleview, true, true)
 		else
-			views.last.pack2(bibleview, true, true)
+			@views.last.pack2(bibleview, true, true)
 			bibleview.show
 		end
-		@bibleviews << bibleview
+		@views << bibleview
 		return bibleview
 	end
 
-	def delete_view(view)
-		return if views.length == 1
-		current = views.index(view)
-		view.remove(views[current+1])
-		if view == views.first
-			@paned.remove(view)
-			@paned.pack2(views[current+1], true, true)
+	def search(bible, text, match, partial, range)
+		search_view = Search.new(bible, text, match, partial, range)
+		if @views == []
+			@paned.pack2(search_view, true, true)
 		else
-			views[current-1].remove(view)
-			views[current-1].pack2(views[current+1], true, true)
+			@views.last.pack2(search_view, true, true)
+			search_view.show
 		end
-		@bibleviews.delete(view) if view.class == BibleView
+		@views << search_view
+		return search_view
+	end
+
+	def delete_view(view)
+		return false if @views.length == 1
+		current = @views.index(view)
+		view.remove(@views[current+1])
+		if view == @views.first
+			@paned.remove(view)
+			@paned.pack2(@views[current+1], true, true)
+		else
+			@views[current-1].remove(view)
+			@views[current-1].pack2(@views[current+1], true, true)
+		end
+		@views.delete(view)
 		view.destroy
+		return true
 	end
 
 	def go_to(book, chapter)
 		@current_book = book
 		@current_chapter = chapter
-		@bibleviews.each { |bv| bv.go_to(book, chapter) }
+		@views.each { |bv| bv.go_to(book, chapter) if bv.class == BibleView }
 	end
 
 	def select_verse(verse)
 		@current_verse = verse
-		views.each { |bv| bv.select_verse(verse) }
+		@views.each { |bv| bv.select_verse(verse) if bv.class == BibleView }
 	end
-
-	def views
-		return @bibleviews # + other...
-	end
-	private :views
 
 	def add_new_bible(file)
 		dialog = Gtk::FileChooserDialog.new('Choose Bible file',
