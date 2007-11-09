@@ -124,6 +124,8 @@ end
 #
 require "#{SRC}/main"
 require "#{SRC}/bible"
+require "#{SRC}/view"
+require "#{SRC}/search"
 require "#{SRC}/bibleview"
 require "#{SRC}/books"
 require "#{I18N}/i18n"
