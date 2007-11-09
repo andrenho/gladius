@@ -2,10 +2,22 @@ class Bible
 
 	def initialize(bible)
 		@db = SQLite3::Database.new("#{BIBLES}/#{bible}.bible")
+		@db.results_as_hash = true
 	end
 
 	def verse(book, chapter, verse)
 		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
+	end
+
+	def search(text, match, partial, range)
+		sql = "SELECT b.*, k.abbr 
+		         FROM bible b, books k 
+		        WHERE b.book = k.id
+		          AND text LIKE '%#{text}%'"
+		rs = []
+		@db.execute(sql).each do |row|
+			rs << row
+		end
 	end
 
 	def name
