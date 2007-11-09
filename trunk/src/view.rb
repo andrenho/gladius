@@ -15,6 +15,7 @@ class View < Gtk::HPaned
 		@frame = Gtk::Frame.new
 		@frame.shadow_type = Gtk::SHADOW_OUT
 		label = Gtk::Label.new(label_text)
+		label.ellipsize = Pango::Layout::ELLIPSIZE_END
 		label.set_alignment(0, 0.5)
 		label.ypad = 2
 		@hbox = Gtk::HBox.new

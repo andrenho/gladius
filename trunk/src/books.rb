@@ -36,14 +36,14 @@ class Books < Gtk::Frame
 			i += 1
 		end
 
-		view = Gtk::TreeView.new(treestore)
+		@view = Gtk::TreeView.new(treestore)
 		
 		renderer = Gtk::CellRendererText.new
 
-		col = Gtk::TreeViewColumn.new(_('Book'), renderer, :text => 0)
-		view.append_column(col)
+		@col = Gtk::TreeViewColumn.new(_('Book'), renderer, :text => 0)
+		@view.append_column(@col)
 
-		view.signal_connect("row-activated") do |view, path, column|
+		@view.signal_connect("row-activated") do |view, path, column|
 			book, chapter = path.to_str.split(':')
 			book = book.to_i + 1
 			chapter = chapter.to_i + 1
@@ -51,8 +51,15 @@ class Books < Gtk::Frame
 		end
 
 		scroll = Gtk::ScrolledWindow.new
-		scroll.add_with_viewport(view)
+		scroll.add(@view)
 		add(scroll)
+	end
+
+	def go_to(book, chapter)
+		@view.expand_row(Gtk::TreePath.new("#{book-1}"), false)
+		path = Gtk::TreePath.new("#{book-1}:#{chapter-1}")
+		@view.set_cursor(path, @col, false)
+		@view.scroll_to_cell(path, nil, false, 0.5, 0)
 	end
 	
 end

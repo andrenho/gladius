@@ -2,7 +2,7 @@ require 'ftools'
 
 class Main < Gtk::Window
 
-	attr_reader :current_book, :current_chapter, :current_verse
+	attr_reader :current_book, :current_chapter, :current_verse, :books
 
 	def initialize
 		super
@@ -107,6 +107,7 @@ class Main < Gtk::Window
 			@paned.pack2(bibleview, true, true)
 		else
 			@views.last.pack2(bibleview, true, true)
+			@views.last.position = @views.last.allocation.width / 2
 			bibleview.show
 		end
 		@views << bibleview
@@ -119,6 +120,7 @@ class Main < Gtk::Window
 			@paned.pack2(search_view, true, true)
 		else
 			@views.last.pack2(search_view, true, true)
+			@views.last.position = @views.last.allocation.width / 2
 			search_view.show
 		end
 		@views << search_view
@@ -126,7 +128,7 @@ class Main < Gtk::Window
 	end
 
 	def delete_view(view)
-		return false if @views.length == 1
+		return false if bibleviews.length == 1 and view.class == BibleView
 		current = @views.index(view)
 		view.remove(@views[current+1])
 		if view == @views.first
@@ -144,12 +146,13 @@ class Main < Gtk::Window
 	def go_to(book, chapter)
 		@current_book = book
 		@current_chapter = chapter
-		@views.each { |bv| bv.go_to(book, chapter) if bv.class == BibleView }
+		@views.each { |bv| bv.go_to(book, chapter) }
+
 	end
 
 	def select_verse(verse)
 		@current_verse = verse
-		@views.each { |bv| bv.select_verse(verse) if bv.class == BibleView }
+		@views.each { |bv| bv.select_verse(verse) }
 	end
 
 	def add_new_bible(file)
@@ -182,5 +185,12 @@ class Main < Gtk::Window
 		dialog.destroy
 	end
 	private :add_new_bible
+
+	def bibleviews
+		r = []
+		@views.each { |v| r << v if v.class == BibleView }
+		return r
+	end
+	private :bibleviews
 
 end

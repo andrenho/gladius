@@ -25,20 +25,19 @@ class BibleView < View
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
 		@textview.pixels_below_lines = 10
-		@textview.modify_font(Pango::FontDescription.new('Serif 12'))
+		@textview.modify_font(Pango::FontDescription.new('Serif 11'))
 		scroll = Gtk::ScrolledWindow.new
 		scroll.add(@textview)
 		@vbox.pack_start(scroll)
 
 		@tags = []
 		(1..176).each do |n|
-			@tags[n] = @buffer.create_tag("verse#{n}", {
-			    :background_full_height => true,
-			})
+			@tags[n] = @buffer.create_tag("verse#{n}", {})
 		end
 		@last_verse = 1
 
 		@buffer.signal_connect('mark-set') do |w, iter, mark|
+			# TODO this is repeating several times
 			if iter.tags != []
 				n = @tags.index(iter.tags[0])
 				$main.select_verse(n)
@@ -86,15 +85,14 @@ class BibleView < View
 		end
 		@tags[verse].background_set = true
 		@tags[verse].background = '#D0FFFF'
-		@tags[verse].paragraph_background = '#D0FFFF'
-		@tags[verse].paragraph_background_set = true
+#		@tags[verse].paragraph_background_set = true
+#		@tags[verse].paragraph_background = '#D0FFFF'
 		@last_verse = verse
 		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
 	end
 
 	def create_search_frame
 		@search_frame = Gtk::Frame.new
-		@search_button.signal_connect('toggled') { @search_frame.visible = @search_button.active? }
 		@search_frame.shadow_type = Gtk::SHADOW_OUT
 		search_hbox = Gtk::HBox.new
 
@@ -165,14 +163,29 @@ class BibleView < View
 		search_hbox.pack_start(range_button, false, false, 0)
 		$tip.set_tip(range_button, 'Range of the search', nil)
 
+		# search click event
+		@search_button.signal_connect('toggled') do 
+			@search_frame.visible = @search_button.active?
+			search_entry.has_focus = true if @search_button.active?
+		end
+
 		# entry event
 		search_entry.signal_connect('activate') do 
 			text = search_entry.text
 			if text != ''
-				m = Search::EXACT if exact.active?
+				m = Search::EXACT     if exact.active?
 				m = Search::ALL_WORDS if all_words.active?
 				m = Search::ANY_WORDS if any_words.active?
-				$main.search(bible, text, m, partial_button.active?, Search::ALL)
+				r = Search::ALL         if all.active?
+				r = Search::PENTATEUCH  if pentateuch.active?
+				r = Search::HISTORICALS if ot_historicals.active?
+				r = Search::WISDOM      if ot_wisdom.active?
+				r = Search::PROPHETS    if prophets.active?
+				r = Search::GOSPELS     if gospels.active?
+				r = Search::ACTS        if acts.active?
+				r = Search::EPISTOLS    if epistols.active?
+				r = Search::REVELATION  if revelation.active?
+				$main.search(bible, text, m, partial_button.active?, r)
 			end
 		end
 
