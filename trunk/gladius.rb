@@ -122,6 +122,7 @@ end
 #
 # Load sources
 #
+require "#{SRC}/download"
 require "#{SRC}/main"
 require "#{SRC}/bible"
 require "#{SRC}/view"

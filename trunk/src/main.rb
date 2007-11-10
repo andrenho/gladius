@@ -63,11 +63,17 @@ class Main < Gtk::Window
 
 		# Add bible translations
 		@bible_menu.append(Gtk::SeparatorMenuItem.new)
-		bible_add = Gtk::MenuItem.new(_('Install...'))
+		bible_add = Gtk::MenuItem.new(_('Install from file...'))
 		bible_add.signal_connect('activate') do
 			add_new_bible(file)
 		end
 		@bible_menu.append(bible_add)
+		bible_download = Gtk::MenuItem.new(_('Download from internet...'))
+		bible_download.signal_connect('activate') do
+			d = Download.new(self)
+			d.show
+		end
+		@bible_menu.append(bible_download)
 		Dir["#{BIBLES}/*.bible"].each do |f|
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
@@ -92,7 +98,7 @@ class Main < Gtk::Window
 			bibleview.menu_item = widget
 			bibleview.menu_item.sensitive = false
 		end
-		@bible_menu.insert(item, @bible_menu.children.length - 2)
+		@bible_menu.insert(item, @bible_menu.children.length - 3)
 		if $default_bible.name == bible_name
 			@views[0].menu_item = item
 			@views[0].menu_item.sensitive = false
