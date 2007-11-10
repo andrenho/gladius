@@ -90,6 +90,7 @@ if OS == :win32
 	IMG = "#{INSTDIR}/img"
 	I18N = "#{INSTDIR}/i18n"
 	BB_VERSION = IO.readlines("#{INSTDIR}/version.txt")[0].chop
+	HOME = "#{HOMEDIR}/gladius"
 #	$db = SQLite3::Database.new("#{HOMEDIR}/bibliomori.db")
 else
 	BIBLES = "#{SHARE}/bibles"
@@ -97,6 +98,7 @@ else
 	SRC = "#{SHARE}/src"
 	IMG = "#{SHARE}/img"
 	I18N = "#{SHARE}/i18n"
+	HOME = "#{ENV['HOME']}/.gladius"
 
 	# Check if installed
 =begin
@@ -130,6 +132,10 @@ require "#{SRC}/search"
 require "#{SRC}/bibleview"
 require "#{SRC}/books"
 require "#{I18N}/i18n"
+
+begin
+	Dir.mkdir(HOME)
+rescue; end
 
 #
 # Initialize Gladius
