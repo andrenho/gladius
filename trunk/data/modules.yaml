@@ -1,11 +1,16 @@
 ---
 -
+  type: info
+  host: 'gladius.googlecode.com'
+-
   type: bible
   language: en
   name: King James Version
-  url: 'http://gladius.googlecode.com/files/en-kjv.zip'
+  file: '/files/en-kjv.zip'
+  size: 1882481
 -
   type: bible
   language: pt-Br
   name: 'João Ferreira de Almeida (RA)'
-  url: 'http://gladius.googlecode.com/files/ptbr-jfa.zip'
+  file: '/files/ptbr-jfa.zip'
+  size: 1932152
