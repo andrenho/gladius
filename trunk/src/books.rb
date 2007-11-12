@@ -43,7 +43,7 @@ class Books < Gtk::Frame
 		@col = Gtk::TreeViewColumn.new(_('Book'), renderer, :text => 0)
 		@view.append_column(@col)
 
-		@view.signal_connect("row-activated") do |view, path, column|
+		@view.signal_connect('row-activated') do |view, path, column|
 			book, chapter = path.to_str.split(':')
 			book = book.to_i + 1
 			chapter = chapter.to_i + 1
