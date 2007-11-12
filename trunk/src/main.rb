@@ -74,7 +74,7 @@ class Main < Gtk::Window
 			d.show
 		end
 		@bible_menu.append(bible_download)
-		Dir["#{BIBLES}/*.bible"].each do |f|
+		Dir["#{HOME}/*.bible"].each do |f|
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
 
@@ -105,7 +105,6 @@ class Main < Gtk::Window
 		end
 		item.show
 	end
-	private :add_bible_to_menu
 
 	def add_bibleview(bible)
 		bibleview = BibleView.new(bible)
@@ -182,7 +181,7 @@ class Main < Gtk::Window
 				dialog.destroy
 				return
 			else
-				File.copy file, "#{BIBLES}/"
+				File.copy file, "#{HOME}/"
 				b = Bible.new(file.scan(/.*[\/\\](.*)\.bible/)[0][0])
 				add_bibleview(b)
 				add_bible_to_menu(file)

@@ -124,11 +124,18 @@ rescue LoadError
 		         "You can get it in <http://yaml4r.sourceforge.net/>."
 end
 
+begin
+	require 'zip/zipfilesystem'
+rescue LoadError
+	$stderr.puts "WARNING: You need rubyzip to run this application.\n" +
+		         "You can get it in <http://sourceforge.net/project/showfiles.php?group_id=43107&package_id=35377>."
+end
+
 #
 # Install!!!
 #
 print 'Installing... '
-['bibles', 'src', 'img', 'i18n'].each do |dir|
+['home', 'src', 'img', 'i18n'].each do |dir|
 	`mkdir -p #{share_dir}/#{dir}`
 	`cp #{dir}/* #{share_dir}/#{dir}/`
 end

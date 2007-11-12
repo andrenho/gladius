@@ -1,7 +1,7 @@
 class Bible
 
 	def initialize(bible)
-		@db = SQLite3::Database.new("#{BIBLES}/#{bible}.bible")
+		@db = SQLite3::Database.new("#{HOME}/#{bible}.bible")
 		@db.results_as_hash = true
 	end
 
@@ -50,8 +50,6 @@ class Bible
 			sql = sql.chop.chop.chop
 			sql += ")"
 		end
-
-		p partial
 
 		if partial
 			return @db.execute(sql)

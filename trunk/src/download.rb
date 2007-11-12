@@ -20,7 +20,7 @@ class Download < Gtk::Window
 
 		set_title(_('Download from the internet'))
 		set_border_width(6)
-		set_default_size(450, 280)
+		set_default_size(500, 320)
 
 		# Downloading... label
 		@vbox = Gtk::VBox.new
@@ -40,14 +40,14 @@ class Download < Gtk::Window
 		@vbox.pack_start(@scroll_options, true, true)
 
 		# Download button
-		download_button = Gtk::Button.new(_('Download'))
+		@download_button = Gtk::Button.new(_('Download'))
 		@af = Gtk::AspectFrame.new('', 1, 0.5, 1, true)
 		@af.shadow_type = Gtk::SHADOW_NONE
-		@af.add(download_button)
-		download_button.show
-		download_button.signal_connect('clicked') do |w|
+		@af.add(@download_button)
+		@download_button.show
+		@download_button.signal_connect('clicked') do |w|
 			Thread.abort_on_exception = true
-			Thread.new { download(w) }
+			@dl_thread = Thread.new { download}
 		end
 		@vbox.pack_start(@af, false, false)
 
@@ -102,9 +102,6 @@ class Download < Gtk::Window
 			Net::HTTP.start('gladius.googlecode.com') do |http|
 				resp = http.get('/svn/trunk/data/modules.yaml')
 				yaml = resp.body
-				# open("#{HOME}/modules.yaml", 'w') do |file|
-				#	file.write(resp.body)
-				# end
 			end
 			records = YAML::load(yaml)
 		rescue
@@ -144,14 +141,29 @@ class Download < Gtk::Window
 		end
 	end
 
-	def download(w)
+	def download
 		# Before
 		@treestore.each do |model, path, iter|
-			iter[PROGRESS_VISIBLE] = true if iter[CHECK]
+			if iter[CHECK]
+				iter[PROGRESS_VISIBLE] = true
+				iter[PROGRESS] = 0
+				iter[PROGRESS_TEXT] = nil
+			end
 		end
-		w.use_stock = true
-		w.label = Gtk::Stock::CANCEL
 		@renderer.signal_handler_block(@handler)
+
+		cancel_button = Gtk::Button.new(Gtk::Stock::CANCEL)
+		@af.remove(@download_button)
+		@af.add(cancel_button)
+		cancel_button.show
+		cancel_button.signal_connect('clicked') do |w|
+			@treestore.each do |model, path, iter|
+				iter[PROGRESS_TEXT] = _('Cancelled') if iter[CHECK]
+			end
+			@af.remove(cancel_button)
+			@af.add(@download_button)
+			@dl_thread.kill
+		end
 
 		# Downloads
 		@treestore.each do |model, path, iter|
@@ -169,20 +181,34 @@ class Download < Gtk::Window
 				end
 
 				# Install
+				bible_filename = ''
+				iter[PROGRESS_TEXT] = _('Unpacking')
 				Zip::ZipFile.open("#{ENV['TEMP']}#{filename}") do |zip|
 					zip.dir.foreach('/') do |file|
-						puts "#{HOME}/#{file}"
 						open("#{HOME}/#{file}", 'wb') do |f|
 							f.write(zip.file.read(file))
+							bible_filename = "#{HOME}/#{file}"
 						end
 					end
 				end
 				File.delete("#{ENV['TEMP']}#{filename}")
+				iter[PROGRESS_TEXT] = _('Done')
+				iter[CHECK] = false
 
+				$main.add_bible_to_menu(bible_filename) if $main != nil
 
 			end
 		end
 
+		# After
+		dialog = Gtk::MessageDialog.new(self,
+			Gtk::Dialog::DESTROY_WITH_PARENT,
+			Gtk::MessageDialog::INFO,
+			Gtk::MessageDialog::BUTTONS_OK,
+			_('All downloads completed successfully'))
+		dialog.run
+		dialog.destroy
+		self.destroy
 	end
 
 end
