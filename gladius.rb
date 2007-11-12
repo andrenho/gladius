@@ -101,24 +101,19 @@ else
 	HOME = "#{ENV['HOME']}/.gladius"
 
 	# Check if installed
-=begin
-	if not File.readable?("#{SHARE}/bibliomori.db")
+	if not File.readable?("#{SHARE}/home/my.yaml")
 		$stderr.puts "This program seem not to be installed. Install it running " +
 			         "'ruby install.rb'."
 		exit
 	end
-=end
 
 	BB_VERSION = IO.readlines("#{SHARE}/version.txt")[0].chop
 
 	# Check for first run
-=begin
-	if not File.readable?("#{ENV['HOME']}/.bibliomori/bibliomori.db")
-		`mkdir -p ~/.bibliomori/bookimgs`
-		`cp #{SHARE}/bibliomori.db ~/.bibliomori/`
-		`cp #{SHARE}/bookimgs/* ~/.bibliomori/bookimgs/`
+	if not File.readable?("#{HOME}/my.yaml")
+		`mkdir -p ~/.gladius`
+		`cp #{SHARE}/home/* #{HOME}/`
 	end
-=end
 end
 
 #
@@ -134,9 +129,14 @@ require "#{SRC}/bibleview"
 require "#{SRC}/books"
 require "#{I18N}/i18n"
 
+# 
+# Initialize configuration files
+#
 begin
 	Dir.mkdir(HOME)
 rescue; end
+
+$config = YAML::load(File.open("#{HOME}/my.yaml"))
 
 #
 # Initialize Gladius
@@ -144,7 +144,7 @@ rescue; end
 load_language
 
 Gtk.init
-$default_bible = Bible.new('kjv') #('ptbr-jfa')
+$default_bible = Bible.new($config['default_bible'])
 $main = Main.new
 $main.show
 Gtk.main

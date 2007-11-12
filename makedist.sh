@@ -7,8 +7,8 @@ cp license.txt gladius-`cat version.txt`/
 cp version.txt gladius-`cat version.txt`/
 cp Changelog gladius-`cat version.txt`/
 cp Install gladius-`cat version.txt`/
-mkdir -p gladius-`cat version.txt`/bibles
-cp bibles/kjv.bible gladius-`cat version.txt`/bibles/
+mkdir -p gladius-`cat version.txt`/home
+cp home/* gladius-`cat version.txt`/home/
 mkdir -p gladius-`cat version.txt`/i18n
 cp i18n/* gladius-`cat version.txt`/i18n/
 mkdir -p gladius-`cat version.txt`/img

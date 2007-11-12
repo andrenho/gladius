@@ -29,6 +29,7 @@ class Search < View
 		@vbox.pack_start(@search_vbox, true, false)
 		show_all
 		Thread.abort_on_exception = true
+		@tags = {}
 		thread = Thread.new do
 			rs = bible.search(text, match, partial, range)
 			show_results(rs)
@@ -37,7 +38,6 @@ class Search < View
 			thread.kill
 			close
 		end
-		@tags = {}
 		@previous = nil
 		@last_mark_set = nil
 	end
@@ -45,11 +45,21 @@ class Search < View
 	def show_results(rs)
 		# text buffer
 		@buffer = Gtk::TextBuffer.new
+		found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
+		found_tag.priority = 0
+
+		found_iters = []
 		iter = @buffer.start_iter
 		rs.each do |row|
 			@tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]] = @buffer.create_tag(nil, {})
-			@buffer.insert(iter, "#{row['abbr']} #{row['chapter']}:#{row['verse']} ")
-			@buffer.insert(iter, row['text'], @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
+			reference = "#{row['abbr']} #{row['chapter']}:#{row['verse']} "
+			@buffer.insert(iter, reference)
+			@buffer.insert(iter, row['text']) #, @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
+			get_ranges().each do |rg|
+				it_start = @buffer.get_iter_at_line_offset(iter.line, rg.first + reference.length)
+				it_end = @buffer.get_iter_at_line_offset(iter.line, rg.first + reference.length)
+				found_iters << [it_start.offset, it_end.offset]
+			end
 			@buffer.insert(iter, "\n", @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
 		end
 
@@ -81,6 +91,14 @@ class Search < View
 		scroll.show_all
 		@vbox.remove(@search_vbox)
 		@vbox.pack_start(scroll)
+
+		while (Gtk.events_pending?)
+		  Gtk.main_iteration
+		end
+		found_iters.each do |iters|
+			p iters
+			@buffer.apply_tag(found_tag, @buffer.get_iter_at_offset(iters[0]), @buffer.get_iter_at_offset(iters[1]))
+		end
 	end
 	private :show_results
 
@@ -99,5 +117,10 @@ class Search < View
 			@previous = nil
 		end
 	end
+
+	def get_ranges()
+		return [(10..15)]
+	end
+	private :get_ranges
 
 end
