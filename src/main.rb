@@ -70,7 +70,7 @@ class Main < Gtk::Window
 		@bible_menu.append(bible_add)
 		bible_download = Gtk::MenuItem.new(_('Download from internet...'))
 		bible_download.signal_connect('activate') do
-			d = Download.new(self)
+			d = Download.new
 			d.show
 		end
 		@bible_menu.append(bible_download)
