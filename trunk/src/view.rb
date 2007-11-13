@@ -41,6 +41,7 @@ class View < Gtk::HPaned
 			@menu = Gtk::Menu.new
 			menuitem.set_submenu(@menu)
 			$main.menubar.append(menuitem)
+			menuitem.show_all
 		end
 	end
 

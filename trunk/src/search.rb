@@ -58,8 +58,8 @@ class Search < View
 			@buffer.insert(iter, reference)
 			@buffer.insert(iter, row['text'], @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
 			get_ranges(row['text'], @search_term).each do |rg|
-				it_start = @buffer.get_iter_at_line_offset(iter.line, rg.first + reference.length)
-				it_end = @buffer.get_iter_at_line_offset(iter.line, rg.last + reference.length)
+				it_start = @buffer.get_iter_at_line_index(iter.line, rg.first + reference.length)
+				it_end = @buffer.get_iter_at_line_index(iter.line, rg.last + reference.length)
 				@buffer.apply_tag(@found_tag, it_start, it_end)
 			end
 			@buffer.insert(iter, "\n", @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])

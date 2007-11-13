@@ -201,13 +201,7 @@ class Download < Gtk::Window
 		end
 
 		# After
-		dialog = Gtk::MessageDialog.new(self,
-			Gtk::Dialog::DESTROY_WITH_PARENT,
-			Gtk::MessageDialog::INFO,
-			Gtk::MessageDialog::BUTTONS_OK,
-			_('All downloads completed successfully'))
-		dialog.run
-		dialog.destroy
+		Util.infobox(_('All downloads completed successfully'))
 		self.destroy
 	end
 
