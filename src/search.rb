@@ -14,7 +14,7 @@ class Search < View
 	EPISTOLS    = 7
 	REVELATION  = 8
 
-	def initialize(bible, text, match, partial, range)
+	def initialize(bibleview, text, match, partial, range)
 		super(_('Search Results') + ': ' + text)
 		@search_vbox = Gtk::VBox.new(false, 12)
 		search_label = Gtk::Label.new(_('Searching...'))
@@ -31,7 +31,7 @@ class Search < View
 		Thread.abort_on_exception = true
 		@tags = {}
 		thread = Thread.new do
-			rs = bible.search(text, match, partial, range)
+			rs = bibleview.bible.search(text, match, partial, range)
 			show_results(rs)
 		end
 		search_cancel.signal_connect('clicked') do
@@ -40,13 +40,15 @@ class Search < View
 		end
 		@previous = nil
 		@last_mark_set = nil
+		@search_term = text
+		@bible = bibleview.bible
 	end
 
 	def show_results(rs)
 		# text buffer
 		@buffer = Gtk::TextBuffer.new
-		found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
-		found_tag.priority = 0
+		@found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
+		@found_tag.priority = 0
 
 		found_iters = []
 		iter = @buffer.start_iter
@@ -54,11 +56,11 @@ class Search < View
 			@tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]] = @buffer.create_tag(nil, {})
 			reference = "#{row['abbr']} #{row['chapter']}:#{row['verse']} "
 			@buffer.insert(iter, reference)
-			@buffer.insert(iter, row['text']) #, @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
-			get_ranges().each do |rg|
+			@buffer.insert(iter, row['text'], @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
+			get_ranges(row['text'], @search_term).each do |rg|
 				it_start = @buffer.get_iter_at_line_offset(iter.line, rg.first + reference.length)
-				it_end = @buffer.get_iter_at_line_offset(iter.line, rg.first + reference.length)
-				found_iters << [it_start.offset, it_end.offset]
+				it_end = @buffer.get_iter_at_line_offset(iter.line, rg.last + reference.length)
+				@buffer.apply_tag(@found_tag, it_start, it_end)
 			end
 			@buffer.insert(iter, "\n", @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
 		end
@@ -66,17 +68,19 @@ class Search < View
 		# click event
 		@buffer.signal_connect('mark-set') do |w, iter, mark|
 			# TODO this is repeating several times
-			if iter.tags != []
-				tx = @tags.index(iter.tags[0])
+			tag = nil
+			iter.tags.each { |t| tag = t if t != @found_tag }
+			if tag != nil
+				tx = @tags.index(tag)
 				$main.go_to(tx[0], tx[1])
 				$main.select_verse(tx[2])
 				$main.books.go_to(tx[0], tx[1])
 				if @previous != nil
 					@previous.background_set = false
 				end
-				iter.tags[0].background = '#D0FFFF'
-				iter.tags[0].background_set = '#D0FFFF'
-				@previous = iter.tags[0]
+				tag.background = '#D0FFFF'
+				tag.background_set = true
+				@previous = tag
 			end
 		end
 
@@ -85,20 +89,16 @@ class Search < View
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
 		@textview.pixels_below_lines = 15
-		@textview.modify_font(Pango::FontDescription.new('Serif 11'))
+		if $config[@bible.abbr, 'font'] == nil
+			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
+		else
+			@textview.modify_font(Pango::FontDescription.new($config[@bible.abbr, 'font']))
+		end
 		scroll = Gtk::ScrolledWindow.new
 		scroll.add(@textview)
 		scroll.show_all
 		@vbox.remove(@search_vbox)
 		@vbox.pack_start(scroll)
-
-		while (Gtk.events_pending?)
-		  Gtk.main_iteration
-		end
-		found_iters.each do |iters|
-			p iters
-			@buffer.apply_tag(found_tag, @buffer.get_iter_at_offset(iters[0]), @buffer.get_iter_at_offset(iters[1]))
-		end
 	end
 	private :show_results
 
@@ -118,8 +118,16 @@ class Search < View
 		end
 	end
 
-	def get_ranges()
-		return [(10..15)]
+	def get_ranges(text, search)
+		r = []
+		search.split.each do |word|
+			offset = text.index(word)
+			while offset != nil
+				r << [offset, offset + word.length]
+				offset = text.index(word, offset + word.length)
+			end
+		end
+		return r
 	end
 	private :get_ranges
 

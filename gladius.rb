@@ -120,6 +120,7 @@ end
 # Load sources
 #
 require "#{SRC}/util"
+require "#{SRC}/config"
 require "#{SRC}/download"
 require "#{SRC}/main"
 require "#{SRC}/bible"
@@ -136,7 +137,7 @@ begin
 	Dir.mkdir(HOME)
 rescue; end
 
-$config = YAML::load(File.open("#{HOME}/my.yaml"))
+$config = GladiusConfig.new
 
 #
 # Initialize Gladius

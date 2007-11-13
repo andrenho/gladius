@@ -81,6 +81,10 @@ class Bible
 		return @db.get_first_value("SELECT variable FROM info WHERE content='name'")
 	end
 
+	def abbr
+		return @db.get_first_value("SELECT variable FROM info WHERE content='abbr'")
+	end
+
 	def Bible.language(file)
 		db = SQLite3::Database.new(file)
 		x = db.get_first_value("SELECT variable FROM info WHERE content='language'")
