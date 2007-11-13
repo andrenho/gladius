@@ -17,7 +17,7 @@ class Main < Gtk::Window
 		@books = Books.new
 		@paned.pack1(@books, true, true)
 		@paned.position = 150
-		set_title("Gladius #{BB_VERSION}") # TODO get from file
+		set_title(_('Gladius %s', BB_VERSION))
 		set_default_size(600, 400)
 		set_icon("#{IMG}/stock_book_yellow-16.png")
 
@@ -176,13 +176,7 @@ class Main < Gtk::Window
 			file = dialog.filename
 			if Bible.name(file) == nil
 				dialog.destroy
-				dialog = Gtk::MessageDialog.new($main,
-					Gtk::Dialog::MODAL,
-					Gtk::MessageDialog::ERROR,
-					Gtk::MessageDialog::BUTTONS_OK,
-					_("File %s is not a valid Bible file.", file))
-				dialog.run
-				dialog.destroy
+				Util.infobox(_("File %s is not a valid Bible file.", file))
 				return
 			else
 				File.copy file, "#{HOME}/"

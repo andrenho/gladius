@@ -63,7 +63,9 @@ class BibleView < View
 		change_font = Gtk::MenuItem.new(_('Change font...'))
 		change_font.signal_connect('activate') do
 			dialog = Gtk::FontSelectionDialog.new
-			dialog.font_name = $config[bible.abbr, 'font']
+			begin
+				dialog.font_name = $config[bible.abbr, 'font']
+			rescue; end
 			dialog.run do |response|
 				if response == Gtk::Dialog::RESPONSE_OK
 					$config[bible.abbr, 'font'] = dialog.font_name
@@ -73,6 +75,15 @@ class BibleView < View
 			dialog.destroy
 		end
 		@menu.append(change_font)
+		
+		make_default = Gtk::MenuItem.new(_('Make this my default translation'))
+		make_default.signal_connect('activate') do
+			$config['default_bible'] = bible.abbr
+			$default_bible = bible
+			Util.infobox(_('%s is now your default bible translation.', bible.name))
+		end
+		@menu.append(make_default)
+
 		@menu.show_all
 	end
 

@@ -1,7 +1,7 @@
 class Bible
 
 	def initialize(bible)
-		@db = SQLite3::Database.new("#{HOME}/#{bible}.bible")
+		@db = SQLite3::Database.new("#{HOME}/#{bible.downcase}.bible")
 		@db.results_as_hash = true
 	end
 
