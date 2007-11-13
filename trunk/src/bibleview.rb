@@ -4,7 +4,7 @@ class BibleView < View
 	attr_accessor :menu_item
 
 	def initialize(bible)
-		super(bible.name)
+		super(bible.name, _('Bible (%s)', bible.abbr))
 		@bible = bible
 
 		# Search button
@@ -25,7 +25,11 @@ class BibleView < View
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
 		@textview.pixels_below_lines = 10
-		@textview.modify_font(Pango::FontDescription.new('Serif 11'))
+		if $config[bible.abbr, 'font'] == nil
+			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
+		else
+			@textview.modify_font(Pango::FontDescription.new($config[bible.abbr, 'font']))
+		end
 		scroll = Gtk::ScrolledWindow.new
 		scroll.add(@textview)
 		@vbox.pack_start(scroll)
@@ -54,6 +58,22 @@ class BibleView < View
 			$main.select_verse(verse)
 		rescue
 		end
+
+		# Menu
+		change_font = Gtk::MenuItem.new(_('Change font...'))
+		change_font.signal_connect('activate') do
+			dialog = Gtk::FontSelectionDialog.new
+			dialog.font_name = $config[bible.abbr, 'font']
+			dialog.run do |response|
+				if response == Gtk::Dialog::RESPONSE_OK
+					$config[bible.abbr, 'font'] = dialog.font_name
+					@textview.modify_font(Pango::FontDescription.new(dialog.font_name))
+				end
+			end
+			dialog.destroy
+		end
+		@menu.append(change_font)
+		@menu.show_all
 	end
 
 	def go_to(book, chapter)
@@ -185,13 +205,20 @@ class BibleView < View
 				r = Search::ACTS        if acts.active?
 				r = Search::EPISTOLS    if epistols.active?
 				r = Search::REVELATION  if revelation.active?
-				$main.search(bible, text, m, partial_button.active?, r)
+				$main.search(self, text, m, partial_button.active?, r)
 			end
 		end
 
 		@search_frame.add(search_hbox)
 		search_hbox.show_all
 		@search_frame.visible = false
+	end
+
+	def font
+		
+	end
+
+	def font=
 	end
 
 	def close

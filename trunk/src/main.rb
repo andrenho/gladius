@@ -3,9 +3,13 @@ require 'ftools'
 class Main < Gtk::Window
 
 	attr_reader :current_book, :current_chapter, :current_verse, :books
+	attr_reader :menubar
 
 	def initialize
 		super
+
+		@current_book = @current_chapter = @current_verse = 1
+		$main = self
 
 		$tip = Gtk::Tooltips.new
 	
@@ -78,8 +82,8 @@ class Main < Gtk::Window
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
 
-		@menubar.append(file)
-		@menubar.append(view)
+		@menubar.prepend(view)
+		@menubar.prepend(file)
 	end
 	private :create_menu
 
