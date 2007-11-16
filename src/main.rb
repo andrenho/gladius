@@ -5,6 +5,9 @@ class Main < Gtk::Window
 	attr_reader :current_book, :current_chapter, :current_verse, :books
 	attr_reader :menubar
 
+	# 
+	# Initialize main screen
+	#
 	def initialize
 		super
 
@@ -26,12 +29,17 @@ class Main < Gtk::Window
 		add(@vbox)
 
 		@menubar = Gtk::MenuBar.new
+		@toolbar = Gtk::Toolbar.new
+		@toolbar.toolbar_style = Gtk::Toolbar::ICONS
 
 		@views = []
 		add_bibleview($default_bible)
 
 		create_menu
 		@vbox.pack_start(@menubar, false, false, 0)
+		create_toolbar
+		@toolbar.show_all
+		@vbox.pack_start(@toolbar, false, false, 0)
 
 		signal_connect('destroy') do 
 			Gtk.main_quit
@@ -46,63 +54,90 @@ class Main < Gtk::Window
 		select_verse(1)
 	end
 
+
+	#
+	# Create menu for the main screen
+	#
 	def create_menu
-		# @menubar.each { |menu_item| @menubar.remove(menu_item) }
+		# File menu
 		file_menu = Gtk::Menu.new
 		file = Gtk::MenuItem.new(_('File'))
 		file.set_submenu(file_menu)
 
-		file_exit = Gtk::MenuItem.new(_('Exit'))
+		# File -> Exit
+		file_exit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
 		file_exit.signal_connect('activate') { Gtk.main_quit }
 		file_menu.append(file_exit)
 
-		view_menu = Gtk::Menu.new
-		view = Gtk::MenuItem.new(_('View'))
-		view.set_submenu(view_menu)
-
+		# Bibles menu
 		@bible_menu = Gtk::Menu.new
-		bible = Gtk::MenuItem.new(_('Bible translations'))
+		bible = Gtk::MenuItem.new(_('Bibles'))
 		bible.set_submenu(@bible_menu)
-		view_menu.append(bible)
-
-		# Add bible translations
-		@bible_menu.append(Gtk::SeparatorMenuItem.new)
-		bible_add = Gtk::MenuItem.new(_('Install from file...'))
+		
+		# Bibles -> Install from file
+		bible_add = Gtk::ImageMenuItem.new(_('Load bible...'))
+		bible_add.image = Gtk::Image.new(Gtk::Stock::OPEN, Gtk::IconSize::MENU)
 		bible_add.signal_connect('activate') do
-			add_new_bible(file)
+			add_new_bible
 		end
 		@bible_menu.append(bible_add)
-		bible_download = Gtk::MenuItem.new(_('Download from internet...'))
+
+		# Bibles -> Download from the internet
+		bible_download = Gtk::ImageMenuItem.new(_('Download from internet...'))
+		bible_download.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
 		bible_download.signal_connect('activate') do
-			d = Download.new
-			d.show
+			Download.new.show
 		end
 		@bible_menu.append(bible_download)
+
+		# Bibles -> Bible translations
+		@bible_menu.append(Gtk::SeparatorMenuItem.new)
 		Dir["#{HOME}/*.bible"].each do |f|
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
 
-		@menubar.prepend(view)
+		@menubar.prepend(Gtk::SeparatorMenuItem.new)
+		@menubar.prepend(Gtk::SeparatorMenuItem.new)
+		@menubar.prepend(Gtk::SeparatorMenuItem.new)
+		@menubar.prepend(bible)
 		@menubar.prepend(file)
 	end
 	private :create_menu
 
+
+	# 
+	# Create a toolbar for the main window
+	# 
+	def create_toolbar
+		bibles = Gtk::Label.new(_('Bibles'))
+		bibles.xpad = 6
+		@toolbar.append(bibles)
+
+		@toolbar.append(Gtk::Stock::OPEN, _('Load bible from file')) { add_new_bible }
+		@toolbar.append(Gtk::Stock::NETWORK, _('Download bible from the internet')) { Download.new.show }
+		# TODO implement
+		@toolbar.append(Gtk::Stock::JUSTIFY_FILL, _('Open a new bible')) {  } 
+
+		@toolbar.append_space
+	end
+	private :create_toolbar
+
+
+	#
+	# Add a new bible to the menu (when the program is started, or when a new
+	# bible is found).
+	#
 	def add_bible_to_menu(f)
 		bible_name = Bible.name(f)
 		item = Gtk::ImageMenuItem.new(bible_name)
-		case Bible.language(f)
-		when 'en'
-			item.image = Gtk::Image.new("#{IMG}/gb.gif")
-		when 'pt-Br'
-			item.image = Gtk::Image.new("#{IMG}/br.gif")
-		end
+		item.image = Gtk::Image.new(Util.flag(Bible.language(f)))
 		item.signal_connect('activate') do |widget|
 			b = Bible.new(f.scan(/.*\/(.*)\.bible/)[0][0])
 			bibleview = add_bibleview(b)
 			bibleview.menu_item = widget
 			bibleview.menu_item.sensitive = false
 		end
-		@bible_menu.insert(item, @bible_menu.children.length - 3)
+		@bible_menu.append(item)
 		if $default_bible.name == bible_name
 			@views[0].menu_item = item
 			@views[0].menu_item.sensitive = false
@@ -110,6 +145,10 @@ class Main < Gtk::Window
 		item.show
 	end
 
+
+	# 
+	# Add a new Bibleview (translation).
+	#
 	def add_bibleview(bible)
 		bibleview = BibleView.new(bible)
 		if @views == []
@@ -123,6 +162,10 @@ class Main < Gtk::Window
 		return bibleview
 	end
 
+
+	# 
+	# Search a text in the bible
+	#
 	def search(bible, text, match, partial, range)
 		search_view = Search.new(bible, text, match, partial, range)
 		if @views == []
@@ -136,6 +179,10 @@ class Main < Gtk::Window
 		return search_view
 	end
 
+
+	#
+	# The user closed a frame
+	# 
 	def delete_view(view)
 		return false if bibleviews.length == 1 and view.class == BibleView
 		current = @views.index(view)
@@ -148,23 +195,32 @@ class Main < Gtk::Window
 			@views[current-1].pack2(@views[current+1], true, true)
 		end
 		@views.delete(view)
+		view.menuitem.destroy
 		view.destroy
 		return true
 	end
 
+	#
+	# Go to a given chapter of the Bible
+	#
 	def go_to(book, chapter)
 		@current_book = book
 		@current_chapter = chapter
 		@views.each { |bv| bv.go_to(book, chapter) }
-
 	end
 
+	#
+	# User clicked on a given verse of the Bible
+	#
 	def select_verse(verse)
 		@current_verse = verse
 		@views.each { |bv| bv.select_verse(verse) }
 	end
 
-	def add_new_bible(file)
+	# 
+	# Install a new Bible from a file
+	#
+	def add_new_bible
 		dialog = Gtk::FileChooserDialog.new('Choose Bible file',
 			$main,
 			Gtk::FileChooser::ACTION_OPEN,
@@ -189,6 +245,10 @@ class Main < Gtk::Window
 	end
 	private :add_new_bible
 
+
+	# 
+	# The list of open bible frames
+	#
 	def bibleviews
 		r = []
 		@views.each { |v| r << v if v.class == BibleView }

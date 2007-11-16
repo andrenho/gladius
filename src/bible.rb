@@ -85,6 +85,14 @@ class Bible
 		return @db.get_first_value("SELECT variable FROM info WHERE content='abbr'")
 	end
 
+	def book_name(book)
+		return @db.get_first_value("SELECT name FROM books WHERE id=#{book}")
+	end
+
+	def last_chapter(book)
+		return @db.get_first_value("SELECT max(chapter) FROM bible WHERE book=#{book}").to_i
+	end
+
 	def Bible.language(file)
 		db = SQLite3::Database.new(file)
 		x = db.get_first_value("SELECT variable FROM info WHERE content='language'")

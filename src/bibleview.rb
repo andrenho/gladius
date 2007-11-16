@@ -3,9 +3,54 @@ class BibleView < View
 	attr_reader :bible
 	attr_accessor :menu_item
 
+	# 
+	# Create the Bible frame
+	#
 	def initialize(bible)
 		super(bible.name, _('Bible (%s)', bible.abbr))
 		@bible = bible
+
+		#
+		# MENU BUTTONS
+		# 
+		
+		# Previous
+		previous_button = Gtk::Button.new
+		previous_button.add(Gtk::Image.new(Gtk::Stock::GO_BACK, Gtk::IconSize::MENU))
+		previous_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(previous_button, _('Previous chapter'), '')
+		@hbox.pack_start(previous_button, false, false)
+		previous_button.signal_connect('clicked') { previous_chapter }
+
+		# Next
+		next_button = Gtk::Button.new
+		next_button.add(Gtk::Image.new(Gtk::Stock::GO_FORWARD, Gtk::IconSize::MENU))
+		next_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(next_button, _('Next chapter'), '')
+		@hbox.pack_start(next_button, false, false)
+		next_button.signal_connect('clicked') { next_chapter }
+
+		# Separator
+		@hbox.pack_start(Gtk::VSeparator.new, false, false)
+
+		# Print Preview
+		pv_button = Gtk::Button.new
+		pv_button.add(Gtk::Image.new(Gtk::Stock::PRINT_PREVIEW, Gtk::IconSize::MENU))
+		pv_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(pv_button, _('Print Preview'), '')
+		@hbox.pack_start(pv_button, false, false)
+		pv_button.signal_connect('clicked') { print_preview }
+
+		# Copy verses
+		cv_button = Gtk::Button.new
+		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
+		cv_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(cv_button, _('Copy Verses'), '')
+		@hbox.pack_start(cv_button, false, false)
+		cv_button.signal_connect('clicked') { copy_verses }
+
+		# Separator
+		@hbox.pack_start(Gtk::VSeparator.new, false, false)
 
 		# Search button
 		@search_button = Gtk::ToggleButton.new
@@ -13,6 +58,14 @@ class BibleView < View
 		@search_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(@search_button, _('Search'), nil)
 		@hbox.pack_start(@search_button, false, false)
+
+		# Preferences
+		pref_button = Gtk::Button.new
+		pref_button.add(Gtk::Image.new(Gtk::Stock::PREFERENCES, Gtk::IconSize::MENU))
+		pref_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(pref_button, _('Options'), '')
+		@hbox.pack_start(pref_button, false, false)
+		pref_button.signal_connect('clicked') { options }
 
 		# Search menu
 		create_search_frame
@@ -38,13 +91,15 @@ class BibleView < View
 		(1..176).each do |n|
 			@tags[n] = @buffer.create_tag("verse#{n}", {})
 		end
+		@tag_header = @buffer.create_tag('', { :font => 'Serif 15', :weight => Pango::FontDescription::WEIGHT_HEAVY })
+
 		@last_verse = 1
 
 		@buffer.signal_connect('mark-set') do |w, iter, mark|
 			# TODO this is repeating several times
 			if iter.tags != []
 				n = @tags.index(iter.tags[0])
-				$main.select_verse(n)
+				$main.select_verse(n) if n != nil
 			end
 		end
 
@@ -87,11 +142,15 @@ class BibleView < View
 		@menu.show_all
 	end
 
+	#
+	# Go to a given chapter in a given book
+	#
 	def go_to(book, chapter)
 		@marks = []
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		text = ''
 		iter = @buffer.start_iter
+		@buffer.insert(iter, "#{@bible.book_name(book)} #{chapter}\n", @tag_header)
 		verse = 1
 		while text != nil
 			text = @bible.verse(book, chapter, verse)
@@ -109,6 +168,9 @@ class BibleView < View
 		rescue; end
 	end
 
+	# 
+	# When the user clicks a verse
+	#
 	def select_verse(verse)
 		if @last_verse > 0
 			@tags[@last_verse].background_set = false
@@ -122,6 +184,9 @@ class BibleView < View
 		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
 	end
 
+	#
+	# Create the search toolbar
+	#
 	def create_search_frame
 		@search_frame = Gtk::Frame.new
 		@search_frame.shadow_type = Gtk::SHADOW_OUT
@@ -149,7 +214,7 @@ class BibleView < View
 
 		# match
 		match_button = Gtk::Button.new
-		match_button.add(Gtk::Image.new(Gtk::Stock::DND_MULTIPLE, Gtk::IconSize::MENU))
+		match_button.add(Gtk::Image.new(Gtk::Stock::FIND_AND_REPLACE, Gtk::IconSize::MENU))
 		match_button.relief = Gtk::RELIEF_NONE
 		match_button.signal_connect('clicked') do 
 			match_menu.popup(nil, nil, 0, 0)
@@ -159,7 +224,7 @@ class BibleView < View
 
 		# partial match
 		partial_button = Gtk::ToggleButton.new
-		partial_button.add(Gtk::Image.new(Gtk::Stock::FIND_AND_REPLACE, Gtk::IconSize::MENU))
+		partial_button.add(Gtk::Image.new("#{IMG}/partial.png"))
 		partial_button.relief = Gtk::RELIEF_NONE
 		partial_button.active = true
 		search_hbox.pack_start(partial_button, false, false, 0)
@@ -192,7 +257,17 @@ class BibleView < View
 			range_menu.popup(nil, nil, 0, 0)
 		end
 		search_hbox.pack_start(range_button, false, false, 0)
-		$tip.set_tip(range_button, 'Range of the search', nil)
+		$tip.set_tip(range_button, _('Range of the search'), nil)
+
+		# separator
+		search_hbox.pack_start(Gtk::VSeparator.new, false, false)
+
+		# in new window
+		new_window = Gtk::ToggleButton.new
+		new_window.add(Gtk::Image.new("#{IMG}/new_window.png"))
+		new_window.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(new_window, _('Open search in a new window'), '')
+		search_hbox.pack_start(new_window, false, false)
 
 		# search click event
 		@search_button.signal_connect('toggled') do 
@@ -225,17 +300,67 @@ class BibleView < View
 		@search_frame.visible = false
 	end
 
-	def font
-		
-	end
-
-	def font=
-	end
-
 	def close
 		if super 
 			@menu_item.sensitive = true
 		end
 	end
 
+	private
+
+	#
+	# Go to the previous chapter
+	# 
+	def previous_chapter
+		book = $main.current_book
+		chapter = $main.current_chapter
+		if chapter == 1
+			if book == 1
+				return
+			else
+				book -= 1
+				chapter = @bible.last_chapter(book)
+			end
+		else
+			chapter -= 1
+		end
+		$main.go_to(book, chapter)	
+	end
+	
+	#
+	# Go to the next chapter
+	#
+	def next_chapter
+		book = $main.current_book
+		chapter = $main.current_chapter
+		if chapter == @bible.last_chapter(book)
+			if book == 66
+				return
+			else
+				book += 1
+				chapter = 1
+			end
+		else
+			chapter += 1
+		end
+		$main.go_to(book, chapter)	
+	end
+
+	# 
+	# Print Preview Screen
+	#
+	def print_preview
+	end
+
+	#
+	# Open Copy Verses Window
+	#
+	def copy_verses
+	end
+
+	#
+	# Open option screen
+	#
+	def options
+	end
 end
