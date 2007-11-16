@@ -1,6 +1,6 @@
 class View < Gtk::HPaned
 
-	attr_reader :menu
+	attr_reader :menu, :menuitem
 
 	def initialize(label_text, label_menu = nil)
 		super()
@@ -37,11 +37,11 @@ class View < Gtk::HPaned
 
 		# Menu
 		if label_menu != nil
-			menuitem = Gtk::MenuItem.new(label_menu)
+			@menuitem = Gtk::MenuItem.new(label_menu)
 			@menu = Gtk::Menu.new
-			menuitem.set_submenu(@menu)
-			$main.menubar.append(menuitem)
-			menuitem.show_all
+			@menuitem.set_submenu(@menu)
+			$main.menubar.append(@menuitem)
+			@menuitem.show_all
 		end
 	end
 
