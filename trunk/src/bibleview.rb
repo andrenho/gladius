@@ -1,13 +1,12 @@
 class BibleView < View
 
 	attr_reader :bible
-	attr_accessor :menu_item
 
 	# 
 	# Create the Bible frame
 	#
 	def initialize(bible)
-		super(bible.name, _('Bible (%s)', bible.abbr))
+		super(bible.name)
 		@bible = bible
 
 		#
@@ -30,42 +29,12 @@ class BibleView < View
 		@hbox.pack_start(next_button, false, false)
 		next_button.signal_connect('clicked') { next_chapter }
 
-		# Separator
-		@hbox.pack_start(Gtk::VSeparator.new, false, false)
-
-		# Print Preview
-		pv_button = Gtk::Button.new
-		pv_button.add(Gtk::Image.new(Gtk::Stock::PRINT_PREVIEW, Gtk::IconSize::MENU))
-		pv_button.relief = Gtk::RELIEF_NONE
-		$tip.set_tip(pv_button, _('Print Preview'), '')
-		@hbox.pack_start(pv_button, false, false)
-		pv_button.signal_connect('clicked') { print_preview }
-
-		# Copy verses
-		cv_button = Gtk::Button.new
-		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
-		cv_button.relief = Gtk::RELIEF_NONE
-		$tip.set_tip(cv_button, _('Copy Verses'), '')
-		@hbox.pack_start(cv_button, false, false)
-		cv_button.signal_connect('clicked') { copy_verses }
-
-		# Separator
-		@hbox.pack_start(Gtk::VSeparator.new, false, false)
-
 		# Search button
 		@search_button = Gtk::ToggleButton.new
 		@search_button.add(Gtk::Image.new(Gtk::Stock::FIND, Gtk::IconSize::MENU))
 		@search_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(@search_button, _('Search'), nil)
 		@hbox.pack_start(@search_button, false, false)
-
-		# Preferences
-		pref_button = Gtk::Button.new
-		pref_button.add(Gtk::Image.new(Gtk::Stock::PREFERENCES, Gtk::IconSize::MENU))
-		pref_button.relief = Gtk::RELIEF_NONE
-		$tip.set_tip(pref_button, _('Options'), '')
-		@hbox.pack_start(pref_button, false, false)
-		pref_button.signal_connect('clicked') { options }
 
 		# Search menu
 		create_search_frame
@@ -114,32 +83,6 @@ class BibleView < View
 		rescue
 		end
 
-		# Menu
-		change_font = Gtk::MenuItem.new(_('Change font...'))
-		change_font.signal_connect('activate') do
-			dialog = Gtk::FontSelectionDialog.new
-			begin
-				dialog.font_name = $config[bible.abbr, 'font']
-			rescue; end
-			dialog.run do |response|
-				if response == Gtk::Dialog::RESPONSE_OK
-					$config[bible.abbr, 'font'] = dialog.font_name
-					@textview.modify_font(Pango::FontDescription.new(dialog.font_name))
-				end
-			end
-			dialog.destroy
-		end
-		@menu.append(change_font)
-		
-		make_default = Gtk::MenuItem.new(_('Make this my default translation'))
-		make_default.signal_connect('activate') do
-			$config['default_bible'] = bible.abbr
-			$default_bible = bible
-			Util.infobox(_('%s is now your default bible translation.', bible.name))
-		end
-		@menu.append(make_default)
-
-		@menu.show_all
 	end
 
 	#

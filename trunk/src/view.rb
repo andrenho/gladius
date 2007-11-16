@@ -1,11 +1,7 @@
 class View < Gtk::HPaned
 
-	attr_reader :menu, :menuitem
-
-	def initialize(label_text, label_menu = nil)
+	def initialize(label_text)
 		super()
-
-		@menu_item = nil
 
 		@framebase = Gtk::Frame.new
 		pack1(@framebase, true, true)
@@ -34,20 +30,15 @@ class View < Gtk::HPaned
 		@frame.add(@hbox)
 		@vbox.pack_start(@frame, false, false)
 		@framebase.add(@vbox)
-
-		# Menu
-		if label_menu != nil
-			@menuitem = Gtk::MenuItem.new(label_menu)
-			@menu = Gtk::Menu.new
-			@menuitem.set_submenu(@menu)
-			$main.menubar.append(@menuitem)
-			@menuitem.show_all
-		end
 	end
 
 	def close
-		$main.menubar.remove(@menu)
 		return $main.delete_view(self)
 	end
+
+	def save; raise 'Implement this method'; end
+	def save_as; raise 'Implement this method'; end
+	def revert; raise 'Implement this method'; end
+	def print_preview; raise 'Implement this method'; end
 
 end

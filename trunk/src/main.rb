@@ -39,7 +39,7 @@ class Main < Gtk::Window
 		@vbox.pack_start(@menubar, false, false, 0)
 		create_toolbar
 		@toolbar.show_all
-		@vbox.pack_start(@toolbar, false, false, 0)
+#		@vbox.pack_start(@toolbar, false, false, 0)
 
 		signal_connect('destroy') do 
 			Gtk.main_quit
@@ -64,11 +64,127 @@ class Main < Gtk::Window
 		file = Gtk::MenuItem.new(_('File'))
 		file.set_submenu(file_menu)
 
-		# File -> Exit
+		# File -> New
+		file_new = Gtk::ImageMenuItem.new(Gtk::Stock::NEW)
+		file_new_menu = Gtk::Menu.new
+		file_new.set_submenu(file_new_menu)
+		file_menu.append(file_new)
+
+		# File -> New -> Topic Study (...)
+		file_new_study = Gtk::MenuItem.new(_('Topic Study') + _('(Not Implemented)'))
+		file_new_study.sensitive = false
+		file_new_menu.append(file_new_study)
+
+		# File -> Open
+		file_open = Gtk::ImageMenuItem.new(Gtk::Stock::OPEN)
+		file_open_menu = Gtk::Menu.new
+		file_open.set_submenu(file_open_menu)
+		file_menu.append(file_open)
+
+		# File -> Open -> Bible (from disk)
+		file_open_bible_d = Gtk::ImageMenuItem.new(_('Bible translation (from disk)...'))
+		file_open_bible_d.image = Gtk::Image.new(Gtk::Stock::HARDDISK, Gtk::IconSize::MENU)
+		file_open_bible_d.signal_connect('activate') { add_new_bible }
+		file_open_menu.append(file_open_bible_d)
+
+		# File -> Open -> Bible (from internet)
+		file_open_bible_i = Gtk::ImageMenuItem.new(_('Bible translation (from internet)...'))
+		file_open_bible_i.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
+		file_open_bible_i.signal_connect('activate') { Download.new.show }
+		file_open_menu.append(file_open_bible_i)
+
+		# File -> -----------
+		file_menu.append(Gtk::SeparatorMenuItem.new)
+
+		# File -> Save
+		file_save = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE)
+		file_save.sensitive = false
+		file_save.signal_connect('activate') { current_view.save }
+		file_menu.append(file_save)
+
+		# File -> Save As
+		file_save_as = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE_AS)
+		file_save_as.sensitive = false
+		file_save_as.signal_connect('activate') { current_view.save_as }
+		file_menu.append(file_save_as)
+
+		# File -> Revert
+		file_revert = Gtk::ImageMenuItem.new(Gtk::Stock::REVERT_TO_SAVED)
+		file_revert.sensitive = false
+		file_revert.signal_connect('activate') { current_view.revert }
+		file_menu.append(file_revert)
+
+		# File -> -----------
+		file_menu.append(Gtk::SeparatorMenuItem.new)
+
+		# File -> Page Setup
+		file_ps = Gtk::MenuItem.new(_('Page Setup...'))
+		file_ps.signal_connect('activate') { page_setup }
+		file_menu.append(file_ps)
+
+		# File -> Print Preview
+		file_pp = Gtk::ImageMenuItem.new(Gtk::Stock::PRINT_PREVIEW)
+		file_pp.signal_connect('activate') { current_view.print_preview }
+		file_menu.append(file_pp)
+
+		# File -> Print...
+		# File -> -----------
+		# File -> Properties
+		# File -> -----------
+		# File -> Close
+
+		# File -> Quit
 		file_exit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
 		file_exit.signal_connect('activate') { Gtk.main_quit }
 		file_menu.append(file_exit)
 
+		# Edit
+		# Edit -> Undo
+		# Edit -> Redo
+		# Edit -> -----------
+		# Edit -> Cut
+		# Edit -> Copy
+		# Edit -> Copy Verses
+		# Edit -> Paste
+		# Edit -> Delete
+		# Edit -> Select All
+		# Edit -> -----------
+		# Edit -> Find...
+		# Edit -> Find Next
+		# Edit -> Find Previous
+		# Edit -> Replace...
+		# Edit -> -----------
+		# Edit -> Default Translation
+		# Edit -> Preferences
+		
+		# View
+		# View -> Previous Chapter
+		# View -> Next Chapter
+		# View -> -----------
+		# View -> Toolbar
+		# View -> -----------
+		# View -> Bible Translations
+		# View -> Topic Studies...
+		
+		# Insert (TODO)
+		
+		# Format
+		# Format -> Font
+		# Format -> Paragraph
+		# Format -> -----------
+		# Format -> Bold
+		# Format -> Italic
+		# Format -> Underline
+
+		# Bookmarks
+		# Bookmarks -> Add
+		# Bookmarks -> ----------
+		# Bookmarks list
+		
+		# Help
+		# Help -> About
+
+=begin
 		# Bibles menu
 		@bible_menu = Gtk::Menu.new
 		bible = Gtk::MenuItem.new(_('Bibles'))
@@ -96,10 +212,8 @@ class Main < Gtk::Window
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
 
-		@menubar.prepend(Gtk::SeparatorMenuItem.new)
-		@menubar.prepend(Gtk::SeparatorMenuItem.new)
-		@menubar.prepend(Gtk::SeparatorMenuItem.new)
 		@menubar.prepend(bible)
+=end
 		@menubar.prepend(file)
 	end
 	private :create_menu
@@ -195,7 +309,6 @@ class Main < Gtk::Window
 			@views[current-1].pack2(@views[current+1], true, true)
 		end
 		@views.delete(view)
-		view.menuitem.destroy
 		view.destroy
 		return true
 	end
@@ -239,6 +352,7 @@ class Main < Gtk::Window
 				b = Bible.new(file.scan(/.*[\/\\](.*)\.bible/)[0][0])
 				add_bibleview(b)
 				add_bible_to_menu(file)
+				Util.infobox(_("This Bible has been installed. You can this Bible anytime by choosing View -> Bible translations -> %s", b.name))
 			end
 		end
 		dialog.destroy
@@ -255,5 +369,14 @@ class Main < Gtk::Window
 		return r
 	end
 	private :bibleviews
+
+
+	# 
+	# Page setup
+	#
+	def page_setup
+		raise 'Implement this method'
+	end
+	private :page_setup
 
 end

@@ -201,7 +201,7 @@ class Download < Gtk::Window
 		end
 
 		# After
-		Util.infobox(_('All downloads completed successfully'))
+		Util.infobox(_('All downloads completed successfully. You can now read any of these modules on the View menu.'))
 		self.destroy
 	end
 
