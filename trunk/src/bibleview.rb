@@ -276,4 +276,10 @@ class BibleView < View
 	#
 	def options
 	end
+
+	#
+	# Add a new bookmark
+	#
+	def add_bookmark
+	end
 end
