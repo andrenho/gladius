@@ -61,7 +61,7 @@ class Main < Gtk::Window
 	def create_menu
 		# File menu
 		file_menu = Gtk::Menu.new
-		file = Gtk::MenuItem.new(_('File'))
+		file = Gtk::MenuItem.new(_('_File'))
 		file.set_submenu(file_menu)
 
 		# File -> New
@@ -128,10 +128,25 @@ class Main < Gtk::Window
 		file_menu.append(file_pp)
 
 		# File -> Print...
+		file_print = Gtk::ImageMenuItem.new(Gtk::Stock::PRINT)
+		file_print.signal_connect('activate') { current_view.print }
+		file_menu.append(file_print)
+
 		# File -> -----------
+		file_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# File -> Properties
+		file_properties = Gtk::ImageMenuItem.new(Gtk::Stock::PROPERTIES)
+		file_properties.signal_connect('activate') { current_view.properties }
+		file_menu.append(file_properties)
+
 		# File -> -----------
+		file_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# File -> Close
+		file_close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
+		file_close.signal_connect('activate') { current_view.close }
+		file_menu.append(file_close)
 
 		# File -> Quit
 		file_exit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
@@ -139,33 +154,101 @@ class Main < Gtk::Window
 		file_menu.append(file_exit)
 
 		# Edit
+		edit_menu = Gtk::Menu.new
+		edit = Gtk::MenuItem.new(_('_Edit'))
+		edit.set_submenu(edit_menu)
+
 		# Edit -> Undo
+		edit_undo = Gtk::ImageMenuItem.new(Gtk::Stock::UNDO)
+		edit_undo.signal_connect('activate') { current_view.undo }
+		edit_menu.append(edit_undo)
+
 		# Edit -> Redo
+		edit_redo = Gtk::ImageMenuItem.new(Gtk::Stock::REDO)
+		edit_redo.signal_connect('activate') { current_view.redo }
+		edit_menu.append(edit_redo)
+
 		# Edit -> -----------
+		edit_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# Edit -> Cut
+		edit_cut = Gtk::ImageMenuItem.new(Gtk::Stock::CUT)
+		edit_cut.signal_connect('activate') { current_view.cut }
+		edit_menu.append(edit_cut)
+
 		# Edit -> Copy
+		edit_copy = Gtk::ImageMenuItem.new(Gtk::Stock::COPY)
+		edit_copy.signal_connect('activate') { current_view.copy }
+		edit_menu.append(edit_copy)
+
 		# Edit -> Copy Verses
+		edit_cv = Gtk::MenuItem.new(_('Copy verses...'))
+		edit_cv.signal_connect('activate') { current_view.copy_verses }
+		edit_menu.append(edit_cv)
+
 		# Edit -> Paste
-		# Edit -> Delete
-		# Edit -> Select All
+		edit_paste = Gtk::ImageMenuItem.new(Gtk::Stock::PASTE)
+		edit_paste.signal_connect('activate') { current_view.paste }
+		edit_menu.append(edit_paste)
+
 		# Edit -> -----------
+		edit_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# Edit -> Find...
+		edit_find = Gtk::ImageMenuItem.new(Gtk::Stock::FIND)
+		edit_find.signal_connect('activate') { current_view.find }
+		edit_menu.append(edit_find)
+
 		# Edit -> Find Next
-		# Edit -> Find Previous
+		edit_fn = Gtk::MenuItem.new(_('Find next'))
+		edit_fn.signal_connect('activate') { current_view.find_next }
+		edit_menu.append(edit_fn)
+
 		# Edit -> Replace...
+		edit_replace = Gtk::MenuItem.new(_('Replace'))
+		edit_replace.signal_connect('activate') { current_view.replace }
+		edit_menu.append(edit_replace)
+
 		# Edit -> -----------
+		edit_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# Edit -> Default Translation
+		edit_dt = Gtk::CheckMenuItem.new(_('Default Translation'))
+		edit_dt.signal_connect('activate') { current_view.default_translation }
+		edit_menu.append(edit_dt)
+
 		# Edit -> Preferences
+		edit_preferences = Gtk::ImageMenuItem.new(Gtk::Stock::PREFERENCES)
+		edit_preferences.signal_connect('activate') { preferences }
+		edit_menu.append(edit_preferences)
 		
 		# View
+		view_menu = Gtk::Menu.new
+		view = Gtk::MenuItem.new(_('_View'))
+		view.set_submenu(view_menu)
+
 		# View -> Previous Chapter
+		view_pc = Gtk::ImageMenuItem.new(Gtk::Stock::GO_BACK)
+		view_pc.signal_connect('activate') { previous_chapter }
+		view_menu.append(view_pc)
+
 		# View -> Next Chapter
+		view_nc = Gtk::ImageMenuItem.new(Gtk::Stock::GO_FORWARD)
+		view_nc.signal_connect('activate') { next_chapter }
+		view_menu.append(view_nc)
+
 		# View -> -----------
-		# View -> Toolbar
-		# View -> -----------
+		view_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# View -> Bible Translations
-		# View -> Topic Studies...
-		
+		@view_bibles_menu = Gtk::Menu.new
+		view_bibles = Gtk::MenuItem.new(_('_Bible Translations'))
+		view_bibles.set_submenu(@view_bibles_menu)
+		Dir["#{HOME}/*.bible"].each do |f|
+			add_bible_to_menu(f) if not f.include? 'default.bible'
+		end
+		view_menu.append(view_bibles)
+
 		# Insert (TODO)
 		
 		# Format
@@ -214,7 +297,9 @@ class Main < Gtk::Window
 
 		@menubar.prepend(bible)
 =end
-		@menubar.prepend(file)
+		@menubar.append(file)
+		@menubar.append(edit)
+		@menubar.append(view)
 	end
 	private :create_menu
 
@@ -251,7 +336,7 @@ class Main < Gtk::Window
 			bibleview.menu_item = widget
 			bibleview.menu_item.sensitive = false
 		end
-		@bible_menu.append(item)
+		@view_bibles_menu.append(item)
 		if $default_bible.name == bible_name
 			@views[0].menu_item = item
 			@views[0].menu_item.sensitive = false
@@ -358,6 +443,46 @@ class Main < Gtk::Window
 		dialog.destroy
 	end
 	private :add_new_bible
+
+
+	#
+	# Go to the previous chapter
+	# 
+	def previous_chapter
+		book = @current_book
+		chapter = @current_chapter
+		if chapter == 1
+			if book == 1
+				return
+			else
+				book -= 1
+				chapter = bibleviews[0].bible.last_chapter(book)
+			end
+		else
+			chapter -= 1
+		end
+		go_to(book, chapter)	
+	end
+	
+
+	#
+	# Go to the next chapter
+	#
+	def next_chapter
+		book = @current_book
+		chapter = @current_chapter
+		if chapter == bibleviews[0].bible.last_chapter(book)
+			if book == 66
+				return
+			else
+				book += 1
+				chapter = 1
+			end
+		else
+			chapter += 1
+		end
+		go_to(book, chapter)	
+	end
 
 
 	# 

@@ -1,5 +1,7 @@
 class View < Gtk::HPaned
 
+	attr_accessor :menu_item
+
 	def initialize(label_text)
 		super()
 
@@ -40,5 +42,16 @@ class View < Gtk::HPaned
 	def save_as; raise 'Implement this method'; end
 	def revert; raise 'Implement this method'; end
 	def print_preview; raise 'Implement this method'; end
+	def print; raise 'Implement this method'; end
+	def properties; raise 'Implement this method'; end
+	def undo; raise 'Implement this method'; end
+	def redo; raise 'Implement this method'; end
+	def cut; raise 'Implement this method'; end
+	def copy; raise 'Implement this method'; end
+	def paste; raise 'Implement this method'; end
+	def find; raise 'Implement this method'; end
+	def find_next; raise 'Implement this method'; end
+	def replace; raise 'Implement this method'; end
+
 
 end
