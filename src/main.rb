@@ -237,6 +237,8 @@ class Main < Gtk::Window
 		view_nc.signal_connect('activate') { next_chapter }
 		view_menu.append(view_nc)
 
+		# TODO - view toolbar
+
 		# View -> -----------
 		view_menu.append(Gtk::SeparatorMenuItem.new)
 
@@ -252,54 +254,70 @@ class Main < Gtk::Window
 		# Insert (TODO)
 		
 		# Format
+		format_menu = Gtk::Menu.new
+		format = Gtk::MenuItem.new(_('_Format'))
+		format.set_submenu(format_menu)
+
 		# Format -> Font
+		format_font = Gtk::MenuItem.new(_('_Font...'))
+		format_font.signal_connect('activate') { current_view.font }
+		format_menu.append(format_font)
+
 		# Format -> Paragraph
+		format_paragraph = Gtk::MenuItem.new(_('_Paragraph...'))
+		format_paragraph.signal_connect('activate') { current_view.paragraph }
+		format_menu.append(format_paragraph)
+
 		# Format -> -----------
+		format_menu.append(Gtk::SeparatorMenuItem.new)
+
 		# Format -> Bold
+		format_bold = Gtk::ImageMenuItem.new(Gtk::Stock::BOLD)
+		format_bold.signal_connect('activate') { current_view.bold }
+		format_menu.append(format_bold)
+
 		# Format -> Italic
+		format_italic = Gtk::ImageMenuItem.new(Gtk::Stock::ITALIC)
+		format_italic.signal_connect('activate') { current_view.italic }
+		format_menu.append(format_italic)
+
 		# Format -> Underline
+		format_underline = Gtk::ImageMenuItem.new(Gtk::Stock::UNDERLINE)
+		format_underline.signal_connect('activate') { current_view.underline }
+		format_menu.append(format_underline)
 
 		# Bookmarks
+		bookmark_menu = Gtk::Menu.new
+		bookmark = Gtk::MenuItem.new(_('_Bookmarks'))
+		bookmark.set_submenu(bookmark_menu)
+
 		# Bookmarks -> Add
+		bookmark_add = Gtk::ImageMenuItem.new(_('Add bookmark'))
+		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
+		bookmark_add.signal_connect('activate') { current_view.add_bookmark }
+		bookmark_menu.append(bookmark_add)
+
 		# Bookmarks -> ----------
-		# Bookmarks list
+		bookmark_menu.append(Gtk::SeparatorMenuItem.new)
+
+		# Bookmarks list (TODO)
 		
 		# Help
+		help_menu = Gtk::Menu.new
+		help = Gtk::MenuItem.new(_('_Help'))
+		help.set_submenu(help_menu)
+
 		# Help -> About
+		help_about = Gtk::ImageMenuItem.new(Gtk::Stock::ABOUT)
+		help_about.signal_connect('activate') { about }
+		help_menu.append(help_about)
 
-=begin
-		# Bibles menu
-		@bible_menu = Gtk::Menu.new
-		bible = Gtk::MenuItem.new(_('Bibles'))
-		bible.set_submenu(@bible_menu)
-		
-		# Bibles -> Install from file
-		bible_add = Gtk::ImageMenuItem.new(_('Load bible...'))
-		bible_add.image = Gtk::Image.new(Gtk::Stock::OPEN, Gtk::IconSize::MENU)
-		bible_add.signal_connect('activate') do
-			add_new_bible
-		end
-		@bible_menu.append(bible_add)
-
-		# Bibles -> Download from the internet
-		bible_download = Gtk::ImageMenuItem.new(_('Download from internet...'))
-		bible_download.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
-		bible_download.signal_connect('activate') do
-			Download.new.show
-		end
-		@bible_menu.append(bible_download)
-
-		# Bibles -> Bible translations
-		@bible_menu.append(Gtk::SeparatorMenuItem.new)
-		Dir["#{HOME}/*.bible"].each do |f|
-			add_bible_to_menu(f) if not f.include? 'default.bible'
-		end
-
-		@menubar.prepend(bible)
-=end
 		@menubar.append(file)
 		@menubar.append(edit)
 		@menubar.append(view)
+		@menubar.append(format)
+		@menubar.append(bookmark)
+		@menubar.append(help)
 	end
 	private :create_menu
 
@@ -398,6 +416,7 @@ class Main < Gtk::Window
 		return true
 	end
 
+
 	#
 	# Go to a given chapter of the Bible
 	#
@@ -407,6 +426,7 @@ class Main < Gtk::Window
 		@views.each { |bv| bv.go_to(book, chapter) }
 	end
 
+
 	#
 	# User clicked on a given verse of the Bible
 	#
@@ -414,6 +434,7 @@ class Main < Gtk::Window
 		@current_verse = verse
 		@views.each { |bv| bv.select_verse(verse) }
 	end
+
 
 	# 
 	# Install a new Bible from a file

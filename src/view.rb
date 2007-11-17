@@ -52,6 +52,9 @@ class View < Gtk::HPaned
 	def find; raise 'Implement this method'; end
 	def find_next; raise 'Implement this method'; end
 	def replace; raise 'Implement this method'; end
-
+	def font; raise 'Implement this method'; end
+	def bold; raise 'Implement this method'; end
+	def italic; raise 'Implement this method'; end
+	def underline; raise 'Implement this method'; end
 
 end
