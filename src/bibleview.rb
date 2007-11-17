@@ -19,7 +19,7 @@ class BibleView < View
 		previous_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(previous_button, _('Previous chapter'), '')
 		@hbox.pack_start(previous_button, false, false)
-		previous_button.signal_connect('clicked') { previous_chapter }
+		previous_button.signal_connect('clicked') { $main.previous_chapter }
 
 		# Next
 		next_button = Gtk::Button.new
@@ -27,7 +27,15 @@ class BibleView < View
 		next_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(next_button, _('Next chapter'), '')
 		@hbox.pack_start(next_button, false, false)
-		next_button.signal_connect('clicked') { next_chapter }
+		next_button.signal_connect('clicked') { $main.next_chapter }
+
+		# Copy verses
+		cv_button = Gtk::Button.new
+		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
+		cv_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(cv_button, _('Copy verses'), '')
+		@hbox.pack_start(cv_button, false, false)
+		cv_button.signal_connect('clicked') { copy_verses }
 
 		# Search button
 		@search_button = Gtk::ToggleButton.new
@@ -250,44 +258,6 @@ class BibleView < View
 	end
 
 	private
-
-	#
-	# Go to the previous chapter
-	# 
-	def previous_chapter
-		book = $main.current_book
-		chapter = $main.current_chapter
-		if chapter == 1
-			if book == 1
-				return
-			else
-				book -= 1
-				chapter = @bible.last_chapter(book)
-			end
-		else
-			chapter -= 1
-		end
-		$main.go_to(book, chapter)	
-	end
-	
-	#
-	# Go to the next chapter
-	#
-	def next_chapter
-		book = $main.current_book
-		chapter = $main.current_chapter
-		if chapter == @bible.last_chapter(book)
-			if book == 66
-				return
-			else
-				book += 1
-				chapter = 1
-			end
-		else
-			chapter += 1
-		end
-		$main.go_to(book, chapter)	
-	end
 
 	# 
 	# Print Preview Screen
