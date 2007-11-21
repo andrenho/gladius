@@ -2,7 +2,7 @@ require 'ftools'
 
 class Main < Gtk::Window
 
-	attr_reader :current_book, :current_chapter, :current_verse, :books
+	attr_reader :current_book, :current_chapter, :current_verse, :books, :views
 	attr_accessor :current_view
 	attr_reader :menubar
 
@@ -530,6 +530,7 @@ class Main < Gtk::Window
 		@views.each { |v| r << v if v.class == BibleView }
 		return r
 	end
+	private :bibleviews
 
 
 	# 
