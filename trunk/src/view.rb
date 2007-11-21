@@ -40,6 +40,11 @@ class View < Gtk::HPaned
 		return $main.delete_view(self)
 	end
 
+	def copy
+		current_buffer.copy_clipboard(Gtk::Clipboard.get(Gdk::Selection::CLIPBOARD))
+	end
+
+	def current_buffer; raise 'Implement this method'; end
 	def save; raise 'Implement this method'; end
 	def save_as; raise 'Implement this method'; end
 	def revert; raise 'Implement this method'; end
@@ -49,7 +54,6 @@ class View < Gtk::HPaned
 	def undo; raise 'Implement this method'; end
 	def redo; raise 'Implement this method'; end
 	def cut; raise 'Implement this method'; end
-	def copy; raise 'Implement this method'; end
 	def paste; raise 'Implement this method'; end
 	def find; raise 'Implement this method'; end
 	def find_next; raise 'Implement this method'; end
