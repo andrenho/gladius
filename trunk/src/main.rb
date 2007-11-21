@@ -3,12 +3,14 @@ require 'ftools'
 class Main < Gtk::Window
 
 	attr_reader :current_book, :current_chapter, :current_verse, :books
+	attr_accessor :current_view
 	attr_reader :menubar
 
 	#
 	# Menu items
 	#
 	attr_reader :file_save, :file_save_as, :file_revert
+	attr_reader :file_close
 	attr_reader :edit_undo, :edit_redo
 	attr_reader :edit_copy, :edit_cut, :edit_cv, :edit_paste
 	attr_reader :edit_find, :edit_fn, :edit_replace
@@ -44,7 +46,7 @@ class Main < Gtk::Window
 		@toolbar.toolbar_style = Gtk::Toolbar::ICONS
 
 		@views = []
-		add_bibleview($default_bible)
+		bibleview = add_bibleview($default_bible)
 
 		create_menu
 		@vbox.pack_start(@menubar, false, false, 0)
@@ -63,6 +65,7 @@ class Main < Gtk::Window
 
 		go_to(1, 1)
 		select_verse(1)
+		bibleview.refit_menus
 	end
 
 
@@ -153,9 +156,9 @@ class Main < Gtk::Window
 		file_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# File -> Close
-		file_close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
-		file_close.signal_connect('activate') { current_view.close }
-		file_menu.append(file_close)
+		@file_close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
+		@file_close.signal_connect('activate') { current_view.close }
+		file_menu.append(@file_close)
 
 		# File -> Quit
 		file_exit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
@@ -388,6 +391,7 @@ class Main < Gtk::Window
 			bibleview.show
 		end
 		@views << bibleview
+		bibleview.refit_menus
 		return bibleview
 	end
 
@@ -526,7 +530,6 @@ class Main < Gtk::Window
 		@views.each { |v| r << v if v.class == BibleView }
 		return r
 	end
-	private :bibleviews
 
 
 	# 
