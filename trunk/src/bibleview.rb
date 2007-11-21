@@ -306,9 +306,9 @@ class BibleView < View
 		$main.file_save.sensitive = false
 		$main.file_save_as.sensitive = false
 		$main.file_revert.sensitive = false
-		if $main.bibleviews.length > 1
+		if $main.views.length > 1
 			$main.file_close.sensitive = true
-			$main.bibleviews.each { |bv| bv.close_button.sensitive = true }
+			$main.views.each { |bv| bv.close_button.sensitive = true }
 		else
 			$main.file_close.sensitive = false
 			@close_button.sensitive = false
