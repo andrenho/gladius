@@ -56,5 +56,6 @@ class View < Gtk::HPaned
 	def bold; raise 'Implement this method'; end
 	def italic; raise 'Implement this method'; end
 	def underline; raise 'Implement this method'; end
+	def refit_menus; raise 'Implement this method'; end
 
 end

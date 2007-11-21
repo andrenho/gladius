@@ -5,6 +5,17 @@ class Main < Gtk::Window
 	attr_reader :current_book, :current_chapter, :current_verse, :books
 	attr_reader :menubar
 
+	#
+	# Menu items
+	#
+	attr_reader :file_save, :file_save_as, :file_revert
+	attr_reader :edit_undo, :edit_redo
+	attr_reader :edit_copy, :edit_cut, :edit_cv, :edit_paste
+	attr_reader :edit_find, :edit_fn, :edit_replace
+	attr_reader :edit_dt, :edit_dt_signal
+	attr_reader :format_font, :format_paragraph
+	attr_reader :format_bold, :format_italic, :format_underline
+
 	# 
 	# Initialize main screen
 	#
@@ -97,22 +108,20 @@ class Main < Gtk::Window
 		file_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# File -> Save
-		file_save = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE)
-		file_save.sensitive = false
-		file_save.signal_connect('activate') { current_view.save }
-		file_menu.append(file_save)
+		@file_save = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE)
+		@file_save.signal_connect('activate') { current_view.save }
+		file_menu.append(@file_save)
 
 		# File -> Save As
-		file_save_as = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE_AS)
-		file_save_as.sensitive = false
-		file_save_as.signal_connect('activate') { current_view.save_as }
-		file_menu.append(file_save_as)
+		@file_save_as = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE_AS)
+		@file_save_as.signal_connect('activate') { current_view.save_as }
+		file_menu.append(@file_save_as)
 
 		# File -> Revert
-		file_revert = Gtk::ImageMenuItem.new(Gtk::Stock::REVERT_TO_SAVED)
-		file_revert.sensitive = false
-		file_revert.signal_connect('activate') { current_view.revert }
-		file_menu.append(file_revert)
+		@file_revert = Gtk::ImageMenuItem.new(Gtk::Stock::REVERT_TO_SAVED)
+		@file_revert.sensitive = false
+		@file_revert.signal_connect('activate') { current_view.revert }
+		file_menu.append(@file_revert)
 
 		# File -> -----------
 		file_menu.append(Gtk::SeparatorMenuItem.new)
@@ -159,63 +168,63 @@ class Main < Gtk::Window
 		edit.set_submenu(edit_menu)
 
 		# Edit -> Undo
-		edit_undo = Gtk::ImageMenuItem.new(Gtk::Stock::UNDO)
-		edit_undo.signal_connect('activate') { current_view.undo }
-		edit_menu.append(edit_undo)
+		@edit_undo = Gtk::ImageMenuItem.new(Gtk::Stock::UNDO)
+		@edit_undo.signal_connect('activate') { current_view.undo }
+		edit_menu.append(@edit_undo)
 
 		# Edit -> Redo
-		edit_redo = Gtk::ImageMenuItem.new(Gtk::Stock::REDO)
-		edit_redo.signal_connect('activate') { current_view.redo }
-		edit_menu.append(edit_redo)
+		@edit_redo = Gtk::ImageMenuItem.new(Gtk::Stock::REDO)
+		@edit_redo.signal_connect('activate') { current_view.redo }
+		edit_menu.append(@edit_redo)
 
 		# Edit -> -----------
 		edit_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# Edit -> Cut
-		edit_cut = Gtk::ImageMenuItem.new(Gtk::Stock::CUT)
-		edit_cut.signal_connect('activate') { current_view.cut }
-		edit_menu.append(edit_cut)
+		@edit_cut = Gtk::ImageMenuItem.new(Gtk::Stock::CUT)
+		@edit_cut.signal_connect('activate') { current_view.cut }
+		edit_menu.append(@edit_cut)
 
 		# Edit -> Copy
-		edit_copy = Gtk::ImageMenuItem.new(Gtk::Stock::COPY)
-		edit_copy.signal_connect('activate') { current_view.copy }
-		edit_menu.append(edit_copy)
+		@edit_copy = Gtk::ImageMenuItem.new(Gtk::Stock::COPY)
+		@edit_copy.signal_connect('activate') { current_view.copy }
+		edit_menu.append(@edit_copy)
 
 		# Edit -> Copy Verses
-		edit_cv = Gtk::MenuItem.new(_('Copy verses...'))
-		edit_cv.signal_connect('activate') { current_view.copy_verses }
-		edit_menu.append(edit_cv)
+		@edit_cv = Gtk::MenuItem.new(_('Copy verses...'))
+		@edit_cv.signal_connect('activate') { current_view.copy_verses }
+		edit_menu.append(@edit_cv)
 
 		# Edit -> Paste
-		edit_paste = Gtk::ImageMenuItem.new(Gtk::Stock::PASTE)
-		edit_paste.signal_connect('activate') { current_view.paste }
-		edit_menu.append(edit_paste)
+		@edit_paste = Gtk::ImageMenuItem.new(Gtk::Stock::PASTE)
+		@edit_paste.signal_connect('activate') { current_view.paste }
+		edit_menu.append(@edit_paste)
 
 		# Edit -> -----------
 		edit_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# Edit -> Find...
-		edit_find = Gtk::ImageMenuItem.new(Gtk::Stock::FIND)
-		edit_find.signal_connect('activate') { current_view.find }
-		edit_menu.append(edit_find)
+		@edit_find = Gtk::ImageMenuItem.new(Gtk::Stock::FIND)
+		@edit_find.signal_connect('activate') { current_view.find }
+		edit_menu.append(@edit_find)
 
 		# Edit -> Find Next
-		edit_fn = Gtk::MenuItem.new(_('Find next'))
-		edit_fn.signal_connect('activate') { current_view.find_next }
-		edit_menu.append(edit_fn)
+		@edit_fn = Gtk::MenuItem.new(_('Find next'))
+		@edit_fn.signal_connect('activate') { current_view.find_next }
+		edit_menu.append(@edit_fn)
 
 		# Edit -> Replace...
-		edit_replace = Gtk::MenuItem.new(_('Replace'))
-		edit_replace.signal_connect('activate') { current_view.replace }
-		edit_menu.append(edit_replace)
+		@edit_replace = Gtk::MenuItem.new(_('Replace'))
+		@edit_replace.signal_connect('activate') { current_view.replace }
+		edit_menu.append(@edit_replace)
 
 		# Edit -> -----------
 		edit_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# Edit -> Default Translation
-		edit_dt = Gtk::CheckMenuItem.new(_('Default Translation'))
-		edit_dt.signal_connect('activate') { current_view.default_translation }
-		edit_menu.append(edit_dt)
+		@edit_dt = Gtk::CheckMenuItem.new(_('Default Translation'))
+		@edit_dt_signal = @edit_dt.signal_connect('activate') { current_view.default_translation }
+		edit_menu.append(@edit_dt)
 
 		# Edit -> Preferences
 		edit_preferences = Gtk::ImageMenuItem.new(Gtk::Stock::PREFERENCES)
@@ -246,10 +255,13 @@ class Main < Gtk::Window
 		@view_bibles_menu = Gtk::Menu.new
 		view_bibles = Gtk::MenuItem.new(_('_Bible Translations'))
 		view_bibles.set_submenu(@view_bibles_menu)
+		p HOME
 		Dir["#{HOME}/*.bible"].each do |f|
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
 		view_menu.append(view_bibles)
+
+		# View -> other modules... (TODO)
 
 		# Insert (TODO)
 		
@@ -259,32 +271,32 @@ class Main < Gtk::Window
 		format.set_submenu(format_menu)
 
 		# Format -> Font
-		format_font = Gtk::MenuItem.new(_('_Font...'))
-		format_font.signal_connect('activate') { current_view.font }
-		format_menu.append(format_font)
+		@format_font = Gtk::MenuItem.new(_('_Font...'))
+		@format_font.signal_connect('activate') { current_view.font }
+		format_menu.append(@format_font)
 
 		# Format -> Paragraph
-		format_paragraph = Gtk::MenuItem.new(_('_Paragraph...'))
-		format_paragraph.signal_connect('activate') { current_view.paragraph }
-		format_menu.append(format_paragraph)
+		@format_paragraph = Gtk::MenuItem.new(_('_Paragraph...'))
+		@format_paragraph.signal_connect('activate') { current_view.paragraph }
+		format_menu.append(@format_paragraph)
 
 		# Format -> -----------
 		format_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# Format -> Bold
-		format_bold = Gtk::ImageMenuItem.new(Gtk::Stock::BOLD)
-		format_bold.signal_connect('activate') { current_view.bold }
-		format_menu.append(format_bold)
+		@format_bold = Gtk::ImageMenuItem.new(Gtk::Stock::BOLD)
+		@format_bold.signal_connect('activate') { current_view.bold }
+		format_menu.append(@format_bold)
 
 		# Format -> Italic
-		format_italic = Gtk::ImageMenuItem.new(Gtk::Stock::ITALIC)
-		format_italic.signal_connect('activate') { current_view.italic }
-		format_menu.append(format_italic)
+		@format_italic = Gtk::ImageMenuItem.new(Gtk::Stock::ITALIC)
+		@format_italic.signal_connect('activate') { current_view.italic }
+		format_menu.append(@format_italic)
 
 		# Format -> Underline
-		format_underline = Gtk::ImageMenuItem.new(Gtk::Stock::UNDERLINE)
-		format_underline.signal_connect('activate') { current_view.underline }
-		format_menu.append(format_underline)
+		@format_underline = Gtk::ImageMenuItem.new(Gtk::Stock::UNDERLINE)
+		@format_underline.signal_connect('activate') { current_view.underline }
+		format_menu.append(@format_underline)
 
 		# Bookmarks
 		bookmark_menu = Gtk::Menu.new
@@ -294,7 +306,7 @@ class Main < Gtk::Window
 		# Bookmarks -> Add
 		bookmark_add = Gtk::ImageMenuItem.new(_('Add bookmark'))
 		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
-		bookmark_add.signal_connect('activate') { current_view.add_bookmark }
+		bookmark_add.signal_connect('activate') { add_bookmark }
 		bookmark_menu.append(bookmark_add)
 
 		# Bookmarks -> ----------
@@ -524,5 +536,22 @@ class Main < Gtk::Window
 		raise 'Implement this method'
 	end
 	private :page_setup
+
+
+	#
+	# About window
+	#
+	def about
+		Gtk::AboutDialog.show(self, {
+			:name => 'Gladius',
+			:version => BB_VERSION,
+			:authors => ['André Wagner'],
+			:comments => '', # TODO
+			:copyright => '© André Wagner - 2007',
+			:license => _('GNU General Public License') + "\n" + _('See http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt'),
+			:website => 'http://gladius.googlecode.com'
+		})
+	end
+	private :about
 
 end
