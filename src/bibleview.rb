@@ -8,6 +8,7 @@ class BibleView < View
 	def initialize(bible)
 		super(bible.name)
 		@bible = bible
+		@find_slot = ""
 
 		#
 		# MENU BUTTONS
@@ -59,6 +60,15 @@ class BibleView < View
 			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
 		else
 			@textview.modify_font(Pango::FontDescription.new($config[bible.abbr, 'font']))
+		end
+		@textview.signal_connect('focus_in_event') { refit_menus }
+		@textview.signal_connect('button_release_event') do |w, e| 
+			refit_menus
+			false
+		end
+		@textview.signal_connect('key_release_event') do |w, e| 
+			refit_menus 
+			false
 		end
 		scroll = Gtk::ScrolledWindow.new
 		scroll.add(@textview)
@@ -281,5 +291,44 @@ class BibleView < View
 	# Add a new bookmark
 	#
 	def add_bookmark
+	end
+
+
+	# 
+	# Check if any menu options need to be set sensible or not
+	#
+	def refit_menus
+		$main.file_save.sensitive = false
+		$main.file_save_as.sensitive = false
+		$main.file_revert.sensitive = false
+
+		$main.edit_undo.sensitive = false
+		$main.edit_redo.sensitive = false
+
+		$main.edit_cv.sensitive = true
+		if @buffer.selection_bounds != nil
+			$main.edit_cut.sensitive = true
+			$main.edit_copy.sensitive = true
+		else
+			$main.edit_cut.sensitive = false
+			$main.edit_copy.sensitive = false
+		end
+		$main.edit_paste.sensitive = false
+
+		$main.edit_find.sensitive = true
+		$main.edit_fn.sensitive = (@find_slot != "")
+		$main.edit_replace.sensitive = false
+
+		$main.edit_dt.sensitive = true
+		$main.edit_dt.signal_handler_block($main.edit_dt_signal) do 
+			$main.edit_dt.active = ($config['default_bible'].downcase == @bible.abbr.downcase)	
+		end
+
+		$main.format_font.sensitive = true
+		$main.format_paragraph.sensitive = true
+
+		$main.format_bold.sensitive = false
+		$main.format_italic.sensitive = false
+		$main.format_underline.sensitive = false
 	end
 end
