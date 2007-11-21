@@ -128,6 +128,7 @@ require "#{SRC}/view"
 require "#{SRC}/search"
 require "#{SRC}/bibleview"
 require "#{SRC}/books"
+require "#{SRC}/bookmarks"
 require "#{I18N}/i18n"
 
 # 

@@ -57,7 +57,7 @@ class BibleView < View
 		@vbox.pack_start(@search_frame, false, false)
 
 		# text buffer
-		@buffer = Gtk::TextBuffer.new
+		@current_buffer = @buffer = Gtk::TextBuffer.new
 		@textview = Gtk::TextView.new(@buffer)
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
@@ -290,10 +290,14 @@ class BibleView < View
 	def options
 	end
 
+
 	#
-	# Add a new bookmark
+	# Set this as my default translation
 	#
-	def add_bookmark
+	def default_translation
+		$config['default_bible'] = @bible.abbr
+		Util.infobox(_('%s is now your default bible.', @bible.name), $main)
+		refit_menus
 	end
 
 
@@ -317,24 +321,23 @@ class BibleView < View
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false
 
-		$main.edit_cv.sensitive = true
+		$main.edit_cut.sensitive = false
 		if @buffer.selection_bounds != nil
-			$main.edit_cut.sensitive = true
-			$main.edit_copy.sensitive = true
+			$main.edit_copy.sensitive = @buffer.selection_bounds[2]
 		else
-			$main.edit_cut.sensitive = false
 			$main.edit_copy.sensitive = false
 		end
+		$main.edit_cv.sensitive = true
 		$main.edit_paste.sensitive = false
 
 		$main.edit_find.sensitive = true
 		$main.edit_fn.sensitive = (@find_slot != "")
 		$main.edit_replace.sensitive = false
 
-		$main.edit_dt.sensitive = true
 		$main.edit_dt.signal_handler_block($main.edit_dt_signal) do 
-			$main.edit_dt.active = ($config['default_bible'].downcase == @bible.abbr.downcase)	
+			$main.edit_dt.active = ($config['default_bible'].downcase == @bible.abbr.downcase)
 		end
+		$main.edit_dt.sensitive = !$main.edit_dt.active?
 
 		$main.format_font.sensitive = true
 		$main.format_paragraph.sensitive = true
@@ -345,4 +348,6 @@ class BibleView < View
 
 		$main.current_view = self
 	end
+
+	def current_buffer; @current_buffer; end
 end

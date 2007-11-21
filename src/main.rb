@@ -307,9 +307,9 @@ class Main < Gtk::Window
 		bookmark.set_submenu(bookmark_menu)
 
 		# Bookmarks -> Add
-		bookmark_add = Gtk::ImageMenuItem.new(_('Add bookmark'))
+		bookmark_add = Gtk::ImageMenuItem.new(_('Add/Edit bookmarks...'))
 		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
-		bookmark_add.signal_connect('activate') { add_bookmark }
+		bookmark_add.signal_connect('activate') { edit_bookmarks }
 		bookmark_menu.append(bookmark_add)
 
 		# Bookmarks -> ----------
@@ -540,6 +540,15 @@ class Main < Gtk::Window
 		raise 'Implement this method'
 	end
 	private :page_setup
+
+
+	#
+	# Add a new bookmark
+	#
+	def edit_bookmarks
+		Bookmarks.new.show
+	end
+	private :edit_bookmarks
 
 
 	#
