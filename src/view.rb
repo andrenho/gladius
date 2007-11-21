@@ -1,6 +1,7 @@
 class View < Gtk::HPaned
 
 	attr_accessor :menu_item
+	attr_reader :close_button
 
 	def initialize(label_text)
 		super()
@@ -22,12 +23,12 @@ class View < Gtk::HPaned
 		@hbox.pack_start(label, true, true, 5)
 
 		# Close button
-		close_button = Gtk::Button.new
-		close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
-		close_button.relief = Gtk::RELIEF_NONE
-		close_button.signal_connect('clicked') { close }
-		$tip.set_tip(close_button, _('Close this frame'), nil)
-		@hbox.pack_end(close_button, false, false)
+		@close_button = Gtk::Button.new
+		@close_button.add(Gtk::Image.new(Gtk::Stock::CLOSE, Gtk::IconSize::MENU))
+		@close_button.relief = Gtk::RELIEF_NONE
+		@close_button.signal_connect('clicked') { close }
+		$tip.set_tip(@close_button, _('Close this frame'), nil)
+		@hbox.pack_end(@close_button, false, false)
 
 		@frame.add(@hbox)
 		@vbox.pack_start(@frame, false, false)
@@ -35,6 +36,7 @@ class View < Gtk::HPaned
 	end
 
 	def close
+		refit_menus
 		return $main.delete_view(self)
 	end
 

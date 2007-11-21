@@ -30,6 +30,9 @@ class BibleView < View
 		@hbox.pack_start(next_button, false, false)
 		next_button.signal_connect('clicked') { $main.next_chapter }
 
+		# ----------------
+		@hbox.pack_start(Gtk::VSeparator.new, false, false)
+
 		# Copy verses
 		cv_button = Gtk::Button.new
 		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
@@ -44,6 +47,9 @@ class BibleView < View
 		@search_button.relief = Gtk::RELIEF_NONE
 		$tip.set_tip(@search_button, _('Search'), nil)
 		@hbox.pack_start(@search_button, false, false)
+
+		# ----------------
+		@hbox.pack_start(Gtk::VSeparator.new, false, false)
 
 		# Search menu
 		create_search_frame
@@ -100,7 +106,6 @@ class BibleView < View
 			$main.select_verse(verse)
 		rescue
 		end
-
 	end
 
 	#
@@ -267,8 +272,6 @@ class BibleView < View
 		end
 	end
 
-	private
-
 	# 
 	# Print Preview Screen
 	#
@@ -298,9 +301,18 @@ class BibleView < View
 	# Check if any menu options need to be set sensible or not
 	#
 	def refit_menus
+		return if $main.file_save == nil
+
 		$main.file_save.sensitive = false
 		$main.file_save_as.sensitive = false
 		$main.file_revert.sensitive = false
+		if $main.bibleviews.length > 1
+			$main.file_close.sensitive = true
+			$main.bibleviews.each { |bv| bv.close_button.sensitive = true }
+		else
+			$main.file_close.sensitive = false
+			@close_button.sensitive = false
+		end
 
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false
@@ -330,5 +342,7 @@ class BibleView < View
 		$main.format_bold.sensitive = false
 		$main.format_italic.sensitive = false
 		$main.format_underline.sensitive = false
+
+		$main.current_view = self
 	end
 end
