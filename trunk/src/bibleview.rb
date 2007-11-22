@@ -62,10 +62,10 @@ class BibleView < View
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
 		@textview.pixels_below_lines = 10
-		if $config[bible.abbr, 'font'] == nil
+		if $config[bible.abbr, 'text_font'] == nil
 			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
 		else
-			@textview.modify_font(Pango::FontDescription.new($config[bible.abbr, 'font']))
+			@textview.modify_font(Pango::FontDescription.new($config[bible.abbr, 'text_font']))
 		end
 		@textview.signal_connect('focus_in_event') { refit_menus }
 		@textview.signal_connect('button_release_event') do |w, e| 
@@ -299,6 +299,15 @@ class BibleView < View
 		Util.infobox(_('%s is now your default bible.', @bible.name), $main)
 		refit_menus
 	end
+
+
+	#
+	# Change font and paragraph
+	#
+	def font(page=1)
+		BibleviewOptions.new(self, page).show
+	end
+	def paragraph; font(2); end
 
 
 	# 
