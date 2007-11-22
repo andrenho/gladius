@@ -1,3 +1,8 @@
+def nz(value, nil_value)
+	return nil_value if(value == nil)
+	return value
+end
+
 class Util
 
 	FL_BR = Gdk::Pixbuf.new("#{IMG}/br.gif")

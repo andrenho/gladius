@@ -258,7 +258,6 @@ class Main < Gtk::Window
 		@view_bibles_menu = Gtk::Menu.new
 		view_bibles = Gtk::MenuItem.new(_('_Bible Translations'))
 		view_bibles.set_submenu(@view_bibles_menu)
-		p HOME
 		Dir["#{HOME}/*.bible"].each do |f|
 			add_bible_to_menu(f) if not f.include? 'default.bible'
 		end
