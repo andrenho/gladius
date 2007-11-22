@@ -27,4 +27,17 @@ class Util
 		d.destroy
 	end
 
+	def Util.warning(message, parent=$main)
+		d = Gtk::MessageDialog.new(parent, 
+			Gtk::Dialog::DESTROY_WITH_PARENT | Gtk::Dialog::MODAL,
+			Gtk::MessageDialog::WARNING,
+			Gtk::MessageDialog::BUTTONS_OK,
+			message)
+		d.title = _('Gladius %s', BB_VERSION)
+		d.modal = true
+		d.transient_for = parent
+		d.run
+		d.destroy
+	end
+
 end
