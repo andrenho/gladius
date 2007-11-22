@@ -42,7 +42,7 @@ private
 		tabs.append_page(frame_font, Gtk::Label.new(_('Font')))
 		tabs.append_page(frame_paragraph, Gtk::Label.new(_('Paragraph')))
 
-		vbox.pack_start(tabs, true, true)
+		vbox.pack_start(tabs, false, false)
 		vbox.pack_start(textframe, true, true)
 		vbox.pack_start(button_box, false, false)
 		add(vbox)
