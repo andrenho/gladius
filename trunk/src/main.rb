@@ -302,20 +302,11 @@ class Main < Gtk::Window
 		format_menu.append(@format_underline)
 
 		# Bookmarks
-		bookmark_menu = Gtk::Menu.new
+		@bookmark_menu = Gtk::Menu.new
 		bookmark = Gtk::MenuItem.new(_('_Bookmarks'))
-		bookmark.set_submenu(bookmark_menu)
+		bookmark.set_submenu(@bookmark_menu)
 
-		# Bookmarks -> Add
-		bookmark_add = Gtk::ImageMenuItem.new(_('Add/Edit bookmarks...'))
-		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
-		bookmark_add.signal_connect('activate') { edit_bookmarks }
-		bookmark_menu.append(bookmark_add)
-
-		# Bookmarks -> ----------
-		bookmark_menu.append(Gtk::SeparatorMenuItem.new)
-
-		# Bookmarks list (TODO)
+		populate_bookmark_menu
 		
 		# Help
 		help_menu = Gtk::Menu.new
@@ -335,6 +326,41 @@ class Main < Gtk::Window
 		@menubar.append(help)
 	end
 	private :create_menu
+
+
+	# 
+	# Add items to the bookmark menu
+	#
+	def populate_bookmark_menu
+		@bookmark_menu.each { |it| @bookmark_menu.remove(it) }
+
+		# Bookmarks -> Add
+		bookmark_add = Gtk::ImageMenuItem.new(_('Add bookmark...'))
+		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
+		bookmark_add.signal_connect('activate') { add_bookmark }
+		@bookmark_menu.append(bookmark_add)
+
+		# Bookmarks -> Edit
+		bookmark_edit = Gtk::MenuItem.new(_('Edit bookmarks...'))
+		bookmark_edit.signal_connect('activate') { edit_bookmarks }
+		bookmark_edit.sensitive = (Bookmarks.list.length != 0)
+		@bookmark_menu.append(bookmark_edit)
+
+		# Bookmarks -> ----------
+		@bookmark_menu.append(Gtk::SeparatorMenuItem.new)
+
+		# Bookmarks list
+		Bookmarks.list.each do |bk|
+			bookmark_item = Gtk::MenuItem.new("#{Books.books[bk[0]-1]} #{bk[1]}:#{bk[2]}")
+			bookmark_item.signal_connect('activate') do 
+				go_to(bk[0], bk[1])
+				select_verse(bk[2])
+			end
+			@bookmark_menu.append(bookmark_item)
+		end
+
+		@bookmark_menu.show_all
+	end
 
 
 	# 
@@ -543,10 +569,21 @@ class Main < Gtk::Window
 
 
 	#
-	# Add a new bookmark
+	# Add a new bookmark in the current position
+	#
+	def add_bookmark
+		Bookmarks.add(@current_book, @current_chapter, @current_verse)
+		populate_bookmark_menu
+	end
+	private :add_bookmark
+
+
+	#
+	# Edit bookmarks
 	#
 	def edit_bookmarks
 		Bookmarks.new.show
+		populate_bookmark_menu
 	end
 	private :edit_bookmarks
 

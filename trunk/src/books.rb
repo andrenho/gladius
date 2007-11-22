@@ -3,7 +3,7 @@ class Books < Gtk::Frame
 	def initialize
 		super
 
-		@books = [
+		@@books = [
 			_('Genesis'), _('Exodus'), _('Leviticus'), _('Numbers'), _('Deuteronomy'),
 			_('Joshua'), _('Judges'), _('Ruth'), _('1 Samuel'), _('2 Samuel'),
 			_('1 Kings'), _('2 Kings'), _('1 Chronicles'), _('2 Chronicles'),
@@ -26,7 +26,7 @@ class Books < Gtk::Frame
 
 		treestore = Gtk::TreeStore.new(String)
 		i = 0
-		@books.each do |book|
+		@@books.each do |book|
 			parent = treestore.append(nil)
 			parent[0] = book
 			(1..@n_chapters[i]).each do |n|
@@ -61,5 +61,7 @@ class Books < Gtk::Frame
 		@view.set_cursor(path, @col, false)
 		@view.scroll_to_cell(path, nil, false, 0.5, 0)
 	end
+
+	def Books.books; return @@books; end
 	
 end
