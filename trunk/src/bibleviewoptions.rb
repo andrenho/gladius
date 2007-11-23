@@ -26,10 +26,10 @@ private
 		ok = Gtk::Button.new(Gtk::Stock::OK)
 		cancel = Gtk::Button.new(Gtk::Stock::CANCEL)
 		apply = Gtk::Button.new(Gtk::Stock::APPLY)
+		button_box.pack_start(apply)
+		button_box.pack_start(cancel)
 		button_box.pack_start(ok)
 		set_default(ok)
-		button_box.pack_start(cancel)
-		button_box.pack_start(apply)
 
 		textframe = Gtk::Frame.new
 		textframe.shadow_type = Gtk::SHADOW_ETCHED_OUT
@@ -118,6 +118,51 @@ private
 	end
 
 	def add_paragraph_controls(frame)
+		tabs = Gtk::Notebook.new
+		code = Gtk::Entry.new
+		
+		box_simple = Gtk::VBox.new(false, 6)
+		box_simple.set_border_width(6)
+		group_1 = Gtk::RadioButton.new(_('Old Bible'))
+		group_1.signal_connect('clicked') { code.text = '#{verse}. #{b_text}#{nl}' }
+		group_2 = Gtk::RadioButton.new(group_1, _('Individual verses'))
+		group_2.signal_connect('clicked') { code.text = '#{abbr} #{chapter}:#{verse} #{b_text}#{nl}' }
+		group_3 = Gtk::RadioButton.new(group_1, _('Paragraphs'))
+		group_3.signal_connect('clicked') { code.text = '#{verse}#{text} #{np}' }
+		group_4 = Gtk::RadioButton.new(group_1, _('Paragraphs (no verses)'))
+		group_4.signal_connect('clicked') { code.text = '#{text} #{np}' }
+		box_simple.pack_start(group_1, false, false)
+		box_simple.pack_start(group_2, false, false)
+		box_simple.pack_start(group_3, false, false)
+		box_simple.pack_start(group_4, false, false)
+		
+		tabs.append_page(box_simple, Gtk::Label.new(_('Simple')))
+
+		box_advanced = Gtk::VBox.new(false, 6)
+		box_advanced.set_border_width(6)
+		box_advanced.pack_start(Gtk::Label.new('#{book} - ' + _('Name of the book (e.g. "Genesis")')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{abbr} - ' + _('Abbreviation of the book (e.g. "Gen")')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{chapter} - ' + _('Number of the chapter')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{verse} - ' + _('Number of the verse')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{text} - ' + _('Text of the verse')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{b_text} - ' + _('Text with the first letter bold when paragraph')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{nl} - ' + _('New line')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('#{np} - ' + _('New line only if new paragraph')), false, false)
+		box_advanced.each do |label|
+			label.xalign = 0
+			label.modify_font(Pango::FontDescription.new('Monospaced 8'))
+		end
+		hbox = Gtk::HBox.new(false, 6)
+		hbox.pack_start(Gtk::Label.new(_('Text code')), false, false)
+		hbox.pack_start(code, true, true)
+		apply = Gtk::Button.new(Gtk::Stock::APPLY)
+		hbox.pack_start(apply, false, false)
+		box_advanced.pack_start(hbox, false, false)
+
+		tabs.append_page(box_advanced, Gtk::Label.new(_('Advanced')))
+	
+		frame.set_border_width(6)
+		frame.add(tabs)
 	end
 
 	def update_sample
