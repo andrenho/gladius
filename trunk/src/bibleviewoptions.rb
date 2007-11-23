@@ -7,7 +7,7 @@ class BibleviewOptions < Gtk::Window
 	end
 
 private
-	
+
 	def add_controls
 		set_title(_('Bible preferences'))
 		set_border_width(6)
@@ -169,6 +169,7 @@ private
 	end
 
 	def ok_clicked
+
 	end
 
 end
