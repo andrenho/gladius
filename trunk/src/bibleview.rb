@@ -1,6 +1,7 @@
 class BibleView < View
 
 	attr_reader :bible
+	attr_reader :format
 
 	# 
 	# Create the Bible frame
@@ -9,6 +10,7 @@ class BibleView < View
 		super(bible.name)
 		@bible = bible
 		@find_slot = ""
+		@format = Format.load(bible.abbr)
 
 		#
 		# MENU BUTTONS
@@ -57,44 +59,10 @@ class BibleView < View
 		@vbox.pack_start(@search_frame, false, false)
 
 		# text buffer
-		@current_buffer = @buffer = Gtk::TextBuffer.new
-		@textview = Gtk::TextView.new(@buffer)
-		@textview.editable = false
-		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
-		@textview.pixels_below_lines = 10
-		if $config[bible.abbr, 'text_font'] == nil
-			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
-		else
-			@textview.modify_font(Pango::FontDescription.new($config[bible.abbr, 'text_font']))
-		end
-		@textview.signal_connect('focus_in_event') { refit_menus }
-		@textview.signal_connect('button_release_event') do |w, e| 
-			refit_menus
-			false
-		end
-		@textview.signal_connect('key_release_event') do |w, e| 
-			refit_menus 
-			false
-		end
-		scroll = Gtk::ScrolledWindow.new
-		scroll.add(@textview)
-		@vbox.pack_start(scroll)
-
-		@tags = []
-		(1..176).each do |n|
-			@tags[n] = @buffer.create_tag("verse#{n}", {})
-		end
-		@tag_header = @buffer.create_tag('', { :font => 'Serif 15', :weight => Pango::FontDescription::WEIGHT_HEAVY })
+		@bible_text = BibleText.new(@bible, @format)
+		@vbox.pack_start(@bible_text)
 
 		@last_verse = 1
-
-		@buffer.signal_connect('mark-set') do |w, iter, mark|
-			# TODO this is repeating several times
-			if iter.tags != []
-				n = @tags.index(iter.tags[0])
-				$main.select_verse(n) if n != nil
-			end
-		end
 
 		show_all
 		@search_frame.visible = false
@@ -112,6 +80,10 @@ class BibleView < View
 	# Go to a given chapter in a given book
 	#
 	def go_to(book, chapter)
+		verses = []
+		(1..@bible.n_verses(book, chapter)).each { |n| verses << [book, chapter, n] }
+		@bible_text.show_verses(verses, "#{@bible.book_name(book)} #{chapter}")
+=begin
 		@marks = []
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		text = ''
@@ -132,12 +104,15 @@ class BibleView < View
 		begin
 			$main.select_verse(1)
 		rescue; end
+=end
 	end
 
 	# 
 	# When the user clicks a verse
 	#
 	def select_verse(verse)
+		@bible_text.select_verse(@current_book, @current_chapter, verse)
+=begin
 		if @last_verse > 0
 			@tags[@last_verse].background_set = false
 			@tags[@last_verse].paragraph_background_set = false
@@ -148,6 +123,7 @@ class BibleView < View
 #		@tags[verse].paragraph_background = '#D0FFFF'
 		@last_verse = verse
 		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
+=end
 	end
 
 	#
@@ -331,8 +307,8 @@ class BibleView < View
 		$main.edit_redo.sensitive = false
 
 		$main.edit_cut.sensitive = false
-		if @buffer.selection_bounds != nil
-			$main.edit_copy.sensitive = @buffer.selection_bounds[2]
+		if @bible_text.buffer.selection_bounds != nil
+			$main.edit_copy.sensitive = @bible_text.buffer.selection_bounds[2]
 		else
 			$main.edit_copy.sensitive = false
 		end

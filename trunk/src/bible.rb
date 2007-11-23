@@ -5,7 +5,12 @@ class Bible
 		@db.results_as_hash = true
 	end
 
+	def n_verses(book, chapter)
+		return @db.get_first_value("SELECT max(verse) FROM bible WHERE book=#{book} AND chapter = #{chapter} GROUP BY book, chapter").to_i
+	end
+
 	def verse(book, chapter, verse)
+		# TODO optimize to cache verses
 		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
 	end
 
