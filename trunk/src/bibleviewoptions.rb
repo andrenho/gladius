@@ -24,9 +24,9 @@ private
 		button_box.layout_style = Gtk::ButtonBox::END
 		button_box.spacing = 6
 		ok = Gtk::Button.new(Gtk::Stock::OK)
+		ok.signal_connect('clicked') { ok_clicked }
 		cancel = Gtk::Button.new(Gtk::Stock::CANCEL)
-		apply = Gtk::Button.new(Gtk::Stock::APPLY)
-		button_box.pack_start(apply)
+		cancel.signal_connect('clicked') { self.destroy }
 		button_box.pack_start(cancel)
 		button_box.pack_start(ok)
 		set_default(ok)
@@ -166,6 +166,9 @@ private
 	end
 
 	def update_sample
+	end
+
+	def ok_clicked
 	end
 
 end
