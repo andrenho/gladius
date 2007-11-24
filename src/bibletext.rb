@@ -2,67 +2,71 @@ class BibleText < Gtk::ScrolledWindow
 
 	attr_reader :buffer
 
-	def initialize(bible, format)
+	#
+	# Initialize the Bible Text
+	#
+	def initialize(bible, format, view=nil)
 		super()
 		@bible = bible
 		@format = format
+		@view = view
 
+		# Create buffer and textview
 		@buffer = Gtk::TextBuffer.new
 		@textview = Gtk::TextView.new(@buffer)
 		@textview.editable = false
 		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
 		@textview.pixels_below_lines = 10
 
-		@last_n = -1
+		# Connect events
+		@textview.signal_connect('focus_in_event') do 
+			view.refit_menus if view != nil
+		end
+		@textview.signal_connect('button_release_event') do |w, e| 
+			view.refit_menus if view != nil
+			false
+		end
+		@textview.signal_connect('key_release_event') do |w, e| 
+			view.refit_menus if view != nil
+			false
+		end
+
+		@last_ref = -1
+		@last_selected = []
 
 		initialize_tags
 		set_format
 
-#		@textview.signal_connect('focus_in_event') { refit_menus }
-#		@textview.signal_connect('button_release_event') do |w, e| 
-#			refit_menus
-#			false
-#		end
-#		@textview.signal_connect('key_release_event') do |w, e| 
-#			refit_menus 
-#			false
-#		end
 		self.add(@textview)
-
-#		@tags = []
-#		(1..176).each do |n|
-#			@tags[n] = @buffer.create_tag("verse#{n}", {})
-#		end
-#		@tag_header = @buffer.create_tag('', { :font => 'Serif 15', :weight => Pango::FontDescription::WEIGHT_HEAVY })
-
-#		@buffer.signal_connect('mark-set') do |w, iter, mark|
-#			# TODO this is repeating several times
-#			if iter.tags != []
-#				n = @tags.index(iter.tags[0])
-#				$main.select_verse(n) if n != nil
-#			end
-#		end
 	end
 
+
+	#
+	# Initialize format tags (but do not adjust them)
+	#
 	def initialize_tags
 		@header_tag = @buffer.create_tag(nil, {})
 		@verses_tag = @buffer.create_tag(nil, {})
-		@tags = []
+		@tag_bank = []
 		(0..200).each do |n|
-			@tags[n] = @buffer.create_tag(nil, {})
+			@tag_bank[n] = @buffer.create_tag(nil, {})
 		end
 		@buffer.signal_connect('mark-set') do |w, iter, mark|
 			# TODO this is repeating several times
 			if iter.tags != []
-				n = @tags.index(iter.tags[0])
-				if n != @last_n
-					$main.select_verse(n) if n != nil
-					@last_n = n
+				ref = @tags.index(iter.tags[0])
+				if ref != @last_ref
+					$main.select_verse(ref[0], ref[1], ref[2]) if ref != nil
+					@last_ref = ref
 				end
 			end
 		end
 	end
 
+
+	#
+	# Adjust format tag
+	#
 	def set_format
 		@textview.modify_font(Pango::FontDescription.new(@format.text_font))
 		@textview.modify_text(Gtk::STATE_NORMAL, Gdk::Color.parse(@format.text_color))
@@ -73,15 +77,32 @@ class BibleText < Gtk::ScrolledWindow
 		@verses_tag.font = @format.verses_font
 		@verses_tag.foreground = @format.verses_color
 		# TODO superscript
+
+		@tag_bank.each do |tag| 
+			tag.background = '#D0FFFF'
+			tag.background_set = false
+		end
 	end
 
+
+	#
+	# Clear the text box, and display the verses that are passed as an array
+	#
 	def show_verses(verses, header=nil)
+		if @tags != nil
+			@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
+		end
+		@tags = {}
+		@last_selected = []
+		@marks = {}
 		@verses = verses.clone
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		iter = @buffer.start_iter
 		@buffer.insert(iter, header + "\n", @header_tag)
 		i = 0
 		verses.each do |ref|
+			@tags[ref] = @tag_bank[i]; i += 1
+			@marks[[ref[0], ref[1], ref[2]]] = @buffer.create_mark(nil, iter, true)
 			pos = 0
 			while @format.paragraph_code[pos..pos] != '' and @format.paragraph_code[pos..pos] != nil
 				case @format.paragraph_code[pos..pos]
@@ -97,13 +118,13 @@ class BibleText < Gtk::ScrolledWindow
 					when 'V'
 						@buffer.insert(iter, ref[2].to_s, @verses_tag)
 					when 'T'
-						@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[i])
+						@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[ref])
 					when 'K'
-						@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[i])
+						@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[ref])
 					when 'n'
-						@buffer.insert(iter, "\n", @tags[i])
+						@buffer.insert(iter, "\n", @tags[ref])
 					when 'p'
-						@buffer.insert(iter, "\n", @tags[i])
+						@buffer.insert(iter, "\n", @tags[ref])
 					else
 						@buffer.insert(iter, @format.paragraph_code[pos-1..pos])
 					end
@@ -113,15 +134,22 @@ class BibleText < Gtk::ScrolledWindow
 				end
 				pos += 1
 			end
-			i += 1
 		end
 	end
 
+
+	#
+	# Select the given verse
+	#
 	def select_verse(book, chapter, verse)
-		a = @verses.index([book, chapter, verse])
-		return if a == nil
-		@tags[a].background_set = true
-		@tags[a].background = '#D0FFFF'
+		if @last_selected != [book, chapter, verse] and @last_selected != []
+			@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
+		end
+		if @tags[[book, chapter, verse]] != nil
+			@last_selected = [book, chapter, verse]
+			@tags[[book, chapter, verse]].background_set = true
+			@textview.scroll_to_mark(@marks[[book, chapter, verse]], 0.1, false, 0, 0.3)
+		end
 	end
 
 end

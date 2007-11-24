@@ -47,7 +47,7 @@ class Books < Gtk::Frame
 			book, chapter = path.to_str.split(':')
 			book = book.to_i + 1
 			chapter = chapter.to_i + 1
-			$main.go_to(book, chapter)
+			$main.select_verse(book, chapter, 1)
 		end
 
 		scroll = Gtk::ScrolledWindow.new

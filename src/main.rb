@@ -63,8 +63,7 @@ class Main < Gtk::Window
 		@vbox.show
 		@menubar.show_all
 
-		go_to(1, 1)
-		select_verse(1)
+		select_verse(1, 1, 1)
 		bibleview.refit_menus
 	end
 
@@ -352,8 +351,7 @@ class Main < Gtk::Window
 		Bookmarks.list.each do |bk|
 			bookmark_item = Gtk::MenuItem.new("#{Books.books[bk[0]-1]} #{bk[1]}:#{bk[2]}")
 			bookmark_item.signal_connect('activate') do 
-				go_to(bk[0], bk[1])
-				select_verse(bk[2])
+				select_verse(bk[0], bk[1], bk[2])
 			end
 			@bookmark_menu.append(bookmark_item)
 		end
@@ -454,26 +452,20 @@ class Main < Gtk::Window
 		end
 		@views.delete(view)
 		view.destroy
+		current_view = bibleviews[0]
+		current_view.refit_menus
 		return true
-	end
-
-
-	#
-	# Go to a given chapter of the Bible
-	#
-	def go_to(book, chapter)
-		@current_book = book
-		@current_chapter = chapter
-		@views.each { |bv| bv.go_to(book, chapter) }
 	end
 
 
 	#
 	# User clicked on a given verse of the Bible
 	#
-	def select_verse(verse)
+	def select_verse(book, chapter, verse)
+		@current_book = book
+		@current_chapter = chapter
 		@current_verse = verse
-		@views.each { |bv| bv.select_verse(verse) }
+		@views.each { |bv| bv.select_verse(book, chapter, verse) }
 	end
 
 
@@ -523,7 +515,7 @@ class Main < Gtk::Window
 		else
 			chapter -= 1
 		end
-		go_to(book, chapter)	
+		select_verse(book, chapter, 1)	
 	end
 	
 
@@ -543,7 +535,7 @@ class Main < Gtk::Window
 		else
 			chapter += 1
 		end
-		go_to(book, chapter)	
+		select_verse(book, chapter, 1)
 	end
 
 

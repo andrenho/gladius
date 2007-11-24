@@ -36,7 +36,6 @@ class View < Gtk::HPaned
 	end
 
 	def close
-		refit_menus
 		return $main.delete_view(self)
 	end
 

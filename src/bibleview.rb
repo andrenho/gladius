@@ -12,6 +12,9 @@ class BibleView < View
 		@find_slot = ""
 		@format = Format.load(bible.abbr)
 
+		@displaying_book = 0
+		@displaying_chapter = 0
+
 		#
 		# MENU BUTTONS
 		# 
@@ -59,7 +62,7 @@ class BibleView < View
 		@vbox.pack_start(@search_frame, false, false)
 
 		# text buffer
-		@bible_text = BibleText.new(@bible, @format)
+		@bible_text = BibleText.new(@bible, @format, self)
 		@vbox.pack_start(@bible_text)
 
 		@last_verse = 1
@@ -69,62 +72,28 @@ class BibleView < View
 
 		begin
 			verse = $main.current_verse
-			go_to($main.current_book, $main.current_chapter)
-			select_verse(verse)
-			$main.select_verse(verse)
+			select_verse($main.current_book, $main.current_chapter, verse)
+			$main.select_verse($main.current_book, $main.current_chapter, verse)
 		rescue
 		end
 	end
 
-	#
-	# Go to a given chapter in a given book
-	#
-	def go_to(book, chapter)
-		verses = []
-		(1..@bible.n_verses(book, chapter)).each { |n| verses << [book, chapter, n] }
-		@bible_text.show_verses(verses, "#{@bible.book_name(book)} #{chapter}")
-=begin
-		@marks = []
-		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
-		text = ''
-		iter = @buffer.start_iter
-		@buffer.insert(iter, "#{@bible.book_name(book)} #{chapter}\n", @tag_header)
-		verse = 1
-		while text != nil
-			text = @bible.verse(book, chapter, verse)
-			if text != nil
-				@marks[verse] = @buffer.create_mark(nil, iter, true)
-				@buffer.insert(iter, verse.to_s)
-				@buffer.insert(iter, '. ')
-				@buffer.insert(iter, text, @tags[verse])
-				@buffer.insert(iter, "\n", @tags[verse])
-				verse += 1
-			end
-		end
-		begin
-			$main.select_verse(1)
-		rescue; end
-=end
-	end
 
 	# 
 	# When the user clicks a verse
 	#
-	def select_verse(verse)
-		@bible_text.select_verse(@current_book, @current_chapter, verse)
-=begin
-		if @last_verse > 0
-			@tags[@last_verse].background_set = false
-			@tags[@last_verse].paragraph_background_set = false
+	def select_verse(book, chapter, verse)
+		if book != @displaying_book or chapter != @displaying_chapter
+			verses = []
+			(1..@bible.n_verses(book, chapter)).each { |n| verses << [book, chapter, n] }
+			@displaying_book = book
+			@displaying_chapter = chapter
+			@bible_text.show_verses(verses, "#{@bible.book_name(book)} #{chapter}")
 		end
-		@tags[verse].background_set = true
-		@tags[verse].background = '#D0FFFF'
-#		@tags[verse].paragraph_background_set = true
-#		@tags[verse].paragraph_background = '#D0FFFF'
-		@last_verse = verse
-		@textview.scroll_to_mark(@marks[verse], 0.1, false, 0, 0.3)
-=end
+
+		@bible_text.select_verse($main.current_book, $main.current_chapter, verse)
 	end
+
 
 	#
 	# Create the search toolbar
@@ -242,11 +211,16 @@ class BibleView < View
 		@search_frame.visible = false
 	end
 
+
+	#
+	# Close the form
+	#
 	def close
 		if super 
 			@menu_item.sensitive = true
 		end
 	end
+
 
 	# 
 	# Print Preview Screen
@@ -254,11 +228,13 @@ class BibleView < View
 	def print_preview
 	end
 
+
 	#
 	# Open Copy Verses Window
 	#
 	def copy_verses
 	end
+
 
 	#
 	# Open option screen
@@ -334,5 +310,5 @@ class BibleView < View
 		$main.current_view = self
 	end
 
-	def current_buffer; @current_buffer; end
+	def current_buffer; @bible_text.buffer; end
 end
