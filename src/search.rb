@@ -15,7 +15,19 @@ class Search < View
 	REVELATION  = 8
 
 	def initialize(bibleview, text, match, partial, range)
-		super(_('Search Results') + ': ' + text)
+		super(_('Search Results') + ": #{text}")
+
+		# Copy verses
+		cv_button = Gtk::Button.new
+		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
+		cv_button.relief = Gtk::RELIEF_NONE
+		$tip.set_tip(cv_button, _('Copy verses'), '')
+		@hbox.pack_start(cv_button, false, false)
+		cv_button.signal_connect('clicked') { copy_verses }
+
+		# ----------------
+		@hbox.pack_start(Gtk::VSeparator.new, false, false)
+
 		@search_vbox = Gtk::VBox.new(false, 12)
 		search_label = Gtk::Label.new(_('Searching...'))
 		search_image = Gtk::Image.new("#{IMG}/book.gif")
@@ -42,93 +54,73 @@ class Search < View
 		@last_mark_set = nil
 		@search_term = text
 		@bible = bibleview.bible
+		@format = bibleview.format
 	end
 
 	def show_results(rs)
-		# text buffer
-		@buffer = Gtk::TextBuffer.new
-		@found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
-		@found_tag.priority = 0
+		@text = BibleText.new(@bible, @format, self)
 
-		found_iters = []
-		iter = @buffer.start_iter
+		verses = []
 		rs.each do |row|
-			@tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]] = @buffer.create_tag(nil, {})
-			reference = "#{row['abbr']} #{row['chapter']}:#{row['verse']} "
-			@buffer.insert(iter, reference)
-			@buffer.insert(iter, row['text'], @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
-			get_ranges(row['text'], @search_term).each do |rg|
-				it_start = @buffer.get_iter_at_line_index(iter.line, rg.first + reference.length)
-				it_end = @buffer.get_iter_at_line_index(iter.line, rg.last + reference.length)
-				@buffer.apply_tag(@found_tag, it_start, it_end)
-			end
-			@buffer.insert(iter, "\n", @tags[[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]])
+			verses << [row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]
 		end
+		@text.show_verses(verses, nil, @search_term)
 
-		# click event
-		@buffer.signal_connect('mark-set') do |w, iter, mark|
-			# TODO this is repeating several times
-			tag = nil
-			iter.tags.each { |t| tag = t if t != @found_tag }
-			if tag != nil
-				tx = @tags.index(tag)
-				$main.go_to(tx[0], tx[1])
-				$main.select_verse(tx[2])
-				$main.books.go_to(tx[0], tx[1])
-				if @previous != nil
-					@previous.background_set = false
-				end
-				tag.background = '#D0FFFF'
-				tag.background_set = true
-				@previous = tag
-			end
-		end
-
-		# text view
-		@textview = Gtk::TextView.new(@buffer)
-		@textview.editable = false
-		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
-		@textview.pixels_below_lines = 15
-		if $config[@bible.abbr, 'font'] == nil
-			@textview.modify_font(Pango::FontDescription.new('Serif 11'))
-		else
-			@textview.modify_font(Pango::FontDescription.new($config[@bible.abbr, 'font']))
-		end
-		scroll = Gtk::ScrolledWindow.new
-		scroll.add(@textview)
-		scroll.show_all
+		@text.show_all
 		@vbox.remove(@search_vbox)
-		@vbox.pack_start(scroll)
+		@vbox.pack_start(@text)
 	end
 	private :show_results
 
-	def go_to(x, y); end
+	def select_verse(book, chapter, verse)
+		@text.select_verse(book, chapter, verse)
+	end
 
-	def select_verse(v)
-		tx = @tags[[$main.current_book, $main.current_chapter, v]]
-		if @previous != nil
-			@previous.background_set = false
-		end
-		if tx != nil
-			tx.background = '#D0FFFF'
-			tx.background_set = true
-			@previous = tx
+	def refit_menus
+		$main.file_save.sensitive = false
+		$main.file_save_as.sensitive = false
+		$main.file_revert.sensitive = false
+		$main.file_close.sensitive = true
+
+		$main.edit_undo.sensitive = false
+		$main.edit_redo.sensitive = false
+
+		$main.edit_cut.sensitive = false
+		if @text.buffer.selection_bounds != nil
+			$main.edit_copy.sensitive = @text.buffer.selection_bounds[2]
 		else
-			@previous = nil
+			$main.edit_copy.sensitive = false
 		end
+		$main.edit_cv.sensitive = true
+		$main.edit_paste.sensitive = false
+
+		$main.edit_find.sensitive = true
+		$main.edit_fn.sensitive = (@find_slot != "")
+		$main.edit_replace.sensitive = false
+
+		$main.edit_dt.sensitive = false
+
+		$main.format_font.sensitive = false
+		$main.format_paragraph.sensitive = false
+
+		$main.format_bold.sensitive = false
+		$main.format_italic.sensitive = false
+		$main.format_underline.sensitive = false
+
+		$main.current_view = self
 	end
 
-	def get_ranges(text, search)
-		r = []
-		search.split.each do |word|
-			offset = text.index(word)
-			while offset != nil
-				r << [offset, offset + word.length]
-				offset = text.index(word, offset + word.length)
-			end
-		end
-		return r
+	#
+	# Copy verses screen
+	def copy_verses
+		# TODO
 	end
-	private :get_ranges
+
+	# 
+	# Print Preview Screen
+	#
+	def print_preview
+	end
+
 
 end

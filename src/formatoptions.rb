@@ -9,6 +9,7 @@ class FormatOptions < Gtk::VBox
 		super(false, 6)
 		@bible = bible
 		@format = format.clone
+		@parent = parent
 		add_controls(book, chapter, page)
 	end
 
@@ -30,7 +31,7 @@ private
 
 		textframe = Gtk::Frame.new(_('Sample'))
 		textframe.shadow_type = Gtk::SHADOW_IN
-		@text = BibleText.new(@bible, @format)
+		@text = BibleText.new(@bible, @format, @parent)
 		@text.border_width = 6
 		@verses = []
 		(1..@bible.n_verses(book, chapter)).each { |n| @verses << [book, chapter, n] }
