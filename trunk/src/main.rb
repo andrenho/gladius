@@ -95,16 +95,21 @@ class Main < Gtk::Window
 		file_menu.append(file_open)
 
 		# File -> Open -> Bible (from disk)
-		file_open_bible_d = Gtk::ImageMenuItem.new(_('Bible translation (from disk)...'))
-		file_open_bible_d.image = Gtk::Image.new(Gtk::Stock::HARDDISK, Gtk::IconSize::MENU)
-		file_open_bible_d.signal_connect('activate') { add_new_bible }
-		file_open_menu.append(file_open_bible_d)
+		file_open_bible = Gtk::MenuItem.new(_('Bible translation...'))
+		file_open_bible.signal_connect('activate') { add_new_bible }
+		file_open_menu.append(file_open_bible)
 
-		# File -> Open -> Bible (from internet)
-		file_open_bible_i = Gtk::ImageMenuItem.new(_('Bible translation (from internet)...'))
-		file_open_bible_i.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
-		file_open_bible_i.signal_connect('activate') { Download.new.show }
-		file_open_menu.append(file_open_bible_i)
+		# File -> Download
+		file_download = Gtk::ImageMenuItem.new(_('Download'))
+		file_download.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
+		file_download_menu = Gtk::Menu.new
+		file_download.set_submenu(file_download_menu)
+		file_menu.append(file_download)
+
+		# File -> Download -> Bible
+		file_download_bible = Gtk::MenuItem.new(_('Bible translation...'))
+		file_download_bible.signal_connect('activate') { Download.new.show }
+		file_download_menu.append(file_download_bible)
 
 		# File -> -----------
 		file_menu.append(Gtk::SeparatorMenuItem.new)

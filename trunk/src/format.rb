@@ -77,7 +77,6 @@ class Format
 		$config[abbr, 'show_strongs'] = @show_strongs
 		
 		$config[abbr, 'paragraph_code'] = @paragraph_code
-		p "saved #{abbr}"
 	end
 
 end
