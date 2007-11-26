@@ -268,7 +268,7 @@ class Main < Gtk::Window
 		
 		# Format
 		format_menu = Gtk::Menu.new
-		format = Gtk::MenuItem.new(_('_Format'))
+		format = Gtk::MenuItem.new(_('F_ormat'))
 		format.set_submenu(format_menu)
 
 		# Format -> Font

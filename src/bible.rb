@@ -94,6 +94,10 @@ class Bible
 		return @db.get_first_value("SELECT name FROM books WHERE id=#{book}")
 	end
 
+	def book_abbr(book)
+		return @db.get_first_value("SELECT abbr FROM books WHERE id=#{book}")
+	end
+
 	def last_chapter(book)
 		return @db.get_first_value("SELECT max(chapter) FROM bible WHERE book=#{book}").to_i
 	end

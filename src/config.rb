@@ -24,7 +24,12 @@ class GladiusConfig
 		if data == nil
 			@data[section] = variable
 		else
-			@data[section] = {}
+			tmp = self[section]
+			if tmp == nil
+				@data[section] = {}
+			else
+				@data[section] = tmp
+			end
 			@data[section][variable] = data
 		end
 
