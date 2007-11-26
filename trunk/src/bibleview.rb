@@ -79,6 +79,14 @@ class BibleView < View
 	end
 
 
+	#
+	# Set a new format to the bible
+	#
+	def format=(new_format)
+		@format = new_format
+		@bible_text.set_format(new_format, true)
+	end
+
 	# 
 	# When the user clicks a verse
 	#
@@ -257,7 +265,7 @@ class BibleView < View
 	# Change font and paragraph
 	#
 	def font(page=1)
-		BibleviewOptions.new(self, page).show
+		BibleviewOptions.new(self, page, @displaying_book, @displaying_chapter).show
 	end
 	def paragraph; font(2); end
 

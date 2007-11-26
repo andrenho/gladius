@@ -1,19 +1,26 @@
 class FormatOptions < Gtk::VBox
 
 	OLD_BIBLE = '%V. %K%n'
+	INDIVIDUAL_VERSES = '%A %C:%V %K%n'
+	PARAGRAPHS = '%V%T %p'
+	PARAGRAPHS_NO_VERSES = '%T %p'
 
-	def initialize(parent, bible)
+	def initialize(format, parent, bible, book=43, chapter=3, page=1)
 		super(false, 6)
 		@bible = bible
-		add_controls
+		@format = format.clone
+		add_controls(book, chapter, page)
 	end
 
 	def format
+		@format
 	end
 
 private
 
-	def add_controls
+	def add_controls(book, chapter, page)
+		@book = book; @chapter = chapter
+
 		tabs = Gtk::Notebook.new
 
 		frame_font = Gtk::Frame.new(_('Fonts'))
@@ -21,13 +28,14 @@ private
 		add_font_controls(frame_font)
 		add_paragraph_controls(frame_paragraph)
 
-		textframe = Gtk::Frame.new
-		textframe.shadow_type = Gtk::SHADOW_ETCHED_OUT
-		@buffer = Gtk::TextBuffer.new
-		@textview = Gtk::TextView.new(@buffer)
-		@textview.editable = false
-		@textview.wrap_mode = Gtk::TextTag::WRAP_WORD
-		textframe.add(@textview)
+		textframe = Gtk::Frame.new(_('Sample'))
+		textframe.shadow_type = Gtk::SHADOW_IN
+		@text = BibleText.new(@bible, @format)
+		@text.border_width = 6
+		@verses = []
+		(1..@bible.n_verses(book, chapter)).each { |n| @verses << [book, chapter, n] }
+		@text.show_verses(@verses, "#{@bible.book_name(book)} #{chapter}")
+		textframe.add(@text)
 
 		tabs.append_page(frame_font, Gtk::Label.new(_('Font')))
 		tabs.append_page(frame_paragraph, Gtk::Label.new(_('Paragraph')))
@@ -38,6 +46,7 @@ private
 		update_sample
 
 		show_all
+		tabs.page = page - 1
 	end
 
 	def add_font_controls(frame)
@@ -50,58 +59,70 @@ private
 
 		# create controls
 		text_chk = Gtk::Label.new(_('Biblical Text Font'))
-		header_chk = Gtk::CheckButton.new(_('Chapter Header'))
-		verses_chk = Gtk::CheckButton.new(_('Biblical References'))
-		strongs_chk = Gtk::CheckButton.new(_('Strongs Numbers'))
-		[text_chk, header_chk, verses_chk, strongs_chk].each do |w|
+		@header_chk = Gtk::CheckButton.new(_('Chapter Header'))
+		verses_chk = Gtk::Label.new(_('Biblical References Font'))
+		@strongs_chk = Gtk::CheckButton.new(_('Strongs Numbers'))
+		[text_chk, @header_chk, verses_chk, @strongs_chk].each do |w|
 			w.xalign = 0
 		end
 
-		text_font = Gtk::FontButton.new(nz($config[abbr, 'text_font'], 'Serif 11'))
-		header_font = Gtk::FontButton.new(nz($config[abbr, 'header_font'], 'Serif Bold 15'))
-		verses_font = Gtk::FontButton.new(nz($config[abbr, 'verses_font'], 'Serif 11'))
-		strongs_font = Gtk::FontButton.new(nz($config[abbr, 'strongs_font'], 'Serif 8'))
-		[text_font, header_font, verses_font, strongs_font].each do |ft_button|
+		@text_font = Gtk::FontButton.new(@format.text_font)
+		@header_font = Gtk::FontButton.new(@format.header_font)
+		@verses_font = Gtk::FontButton.new(@format.verses_font)
+		@strongs_font = Gtk::FontButton.new(@format.strongs_font)
+		[@text_font, @header_font, @verses_font, @strongs_font].each do |ft_button|
 			ft_button.use_font = true
 			ft_button.use_size = true
+			ft_button.signal_connect('font-set') { update_sample }
 		end
 
-		text_color = Gtk::ColorButton.new($config[abbr, 'text_color'])
-		text_bg_color = Gtk::ColorButton.new($config[abbr, 'text_bg_color'])
-		header_color = Gtk::ColorButton.new($config[abbr, 'header_color'])
-		verses_color = Gtk::ColorButton.new($config[abbr, 'verses_color'])
-		strongs_color = Gtk::ColorButton.new(nz($config[abbr, 'strongs_color'], Gdk::Color.parse('#FF0000')))
+		@text_color = Gtk::ColorButton.new(Gdk::Color.parse(@format.text_color))
+		@text_bg_color = Gtk::ColorButton.new(Gdk::Color.parse(@format.text_bg_color))
+		@header_color = Gtk::ColorButton.new(Gdk::Color.parse(@format.header_color))
+		@verses_color = Gtk::ColorButton.new(Gdk::Color.parse(@format.verses_color))
+		@strongs_color = Gtk::ColorButton.new(Gdk::Color.parse(@format.strongs_color))
+		[@text_color, @text_bg_color, @header_color, @verses_color, @strongs_color].each do |c|
+			c.signal_connect('color-set') { update_sample }
+		end
 
-		verses_ss = Gtk::ToggleButton.new
-		strongs_ss = Gtk::ToggleButton.new
-		[verses_ss, strongs_ss].each { |b| b.add(Gtk::Image.new("#{IMG}/stock_superscript-16.png")) }
+		@verses_ss = Gtk::ToggleButton.new
+		@strongs_ss = Gtk::ToggleButton.new
+		[@verses_ss, @strongs_ss].each do |b|
+			b.add(Gtk::Image.new("#{IMG}/stock_superscript-16.png"))
+		end
 
 		# control values
-		header_chk.active = nz($config[abbr, 'show_headers'], true)
-		verses_chk.active = nz($config[abbr, 'show_verses'], true)
-		strongs_chk.active = nz($config[abbr, 'show_strongs'], true)
-		verses_ss.active = nz($config[abbr, 'verses_superscript'], false)
-		strongs_ss.active = nz($config[abbr, 'strongs_superscript'], true)
+		@header_chk.active = @format.show_header
+		@strongs_chk.active = @format.show_strongs
+		@verses_ss.active = @format.verses_ss
+		@strongs_ss.active = @format.strongs_ss
+
+		# connect signals
+		@header_chk.signal_connect('toggled') { update_sample }
+		@strongs_chk.signal_connect('toggled') { update_sample }
+		[@verses_ss, @strongs_ss].each do |b|
+			b.signal_connect('toggled') { update_sample }
+		end
 
 		# attach controls
 		table.attach(text_chk, 0, 1, 0, 1, Gtk::FILL, 0)
-		table.attach(text_font, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, 0)
-		table.attach(text_color, 2, 3, 0, 1, 0, 0)
-		table.attach(text_bg_color, 3, 4, 0, 1, 0, 0)
+		table.attach(@text_font, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, 0)
+		table.attach(@text_color, 2, 3, 0, 1, 0, 0)
+		table.attach(@text_bg_color, 3, 4, 0, 1, 0, 0)
 
-		table.attach(header_chk, 0, 1, 1, 2, Gtk::FILL, 0)
-		table.attach(header_font, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, 0)
-		table.attach(header_color, 2, 3, 1, 2, 0, 0)
+		table.attach(@header_chk, 0, 1, 1, 2, Gtk::FILL, 0)
+		table.attach(@header_font, 1, 2, 1, 2, Gtk::EXPAND|Gtk::FILL, 0)
+		table.attach(@header_color, 2, 3, 1, 2, 0, 0)
 
 		table.attach(verses_chk, 0, 1, 2, 3, Gtk::FILL, 0)
-		table.attach(verses_font, 1, 2, 2, 3, Gtk::EXPAND|Gtk::FILL, 0)
-		table.attach(verses_color, 2, 3, 2, 3, 0, 0)
-		table.attach(verses_ss, 3, 4, 2, 3, 0, 0)
+		table.attach(@verses_font, 1, 2, 2, 3, Gtk::EXPAND|Gtk::FILL, 0)
+		table.attach(@verses_color, 2, 3, 2, 3, 0, 0)
+		table.attach(@verses_ss, 3, 4, 2, 3, 0, 0)
 
-		table.attach(strongs_chk, 0, 1, 3, 4, Gtk::FILL, 0)
-		table.attach(strongs_font, 1, 2, 3, 4, Gtk::EXPAND|Gtk::FILL, 0)
-		table.attach(strongs_color, 2, 3, 3, 4, 0, 0)
-		table.attach(strongs_ss, 3, 4, 3, 4, 0, 0)
+		table.attach(@strongs_chk, 0, 1, 3, 4, Gtk::FILL, 0)
+		table.attach(@strongs_font, 1, 2, 3, 4, Gtk::EXPAND|Gtk::FILL, 0)
+		table.attach(@strongs_color, 2, 3, 3, 4, 0, 0)
+		table.attach(@strongs_ss, 3, 4, 3, 4, 0, 0)
 
 		frame.set_border_width(6)
 		frame.add(table)
@@ -109,22 +130,61 @@ private
 
 	def add_paragraph_controls(frame)
 		tabs = Gtk::Notebook.new
-		code = Gtk::Entry.new
+		@paragraph_code = Gtk::Entry.new
+		@paragraph_code.text = @format.paragraph_code
 		
 		box_simple = Gtk::VBox.new(false, 6)
 		box_simple.set_border_width(6)
 		group_1 = Gtk::RadioButton.new(_('Old Bible'))
-		group_1.signal_connect('clicked') { code.text = OLD_BIBLE }
 		group_2 = Gtk::RadioButton.new(group_1, _('Individual verses'))
-		group_2.signal_connect('clicked') { code.text = '#{abbr} #{chapter}:#{verse} #{b_text}#{nl}' }
 		group_3 = Gtk::RadioButton.new(group_1, _('Paragraphs'))
-		group_3.signal_connect('clicked') { code.text = '#{verse}#{text} #{np}' }
 		group_4 = Gtk::RadioButton.new(group_1, _('Paragraphs (no verses)'))
-		group_4.signal_connect('clicked') { code.text = '#{text} #{np}' }
+		group_advanced = Gtk::RadioButton.new(group_1, _('Advanced'))
+		
+		case @format.paragraph_code
+		when OLD_BIBLE
+			group_1.active = true
+		when INDIVIDUAL_VERSES
+			group_2.active = true
+		when PARAGRAPHS
+			group_3.active = true
+		when PARAGRAPHS_NO_VERSES
+			group_4.active = true
+		else
+			group_advanced.active = true
+		end
+
+		group_1.signal_connect('clicked') do 
+			@paragraph_code.text = OLD_BIBLE
+			@verses_ss.active = false
+			tabs.page = 0
+			update_sample
+		end
+		group_2.signal_connect('clicked') do
+			@paragraph_code.text = INDIVIDUAL_VERSES
+			@verses_ss.active = false
+			tabs.page = 0
+			update_sample
+		end
+		group_3.signal_connect('clicked') do 
+			@paragraph_code.text = PARAGRAPHS
+			@verses_ss.active = true
+			tabs.page = 0
+			update_sample
+		end
+		group_4.signal_connect('clicked') do
+			@paragraph_code.text = PARAGRAPHS_NO_VERSES
+			tabs.page = 0
+			update_sample
+		end
+		group_advanced.signal_connect('clicked') do
+			tabs.page = 1
+		end
 		box_simple.pack_start(group_1, false, false)
 		box_simple.pack_start(group_2, false, false)
 		box_simple.pack_start(group_3, false, false)
 		box_simple.pack_start(group_4, false, false)
+		box_simple.pack_start(group_advanced, false, false)
 		
 		tabs.append_page(box_simple, Gtk::Label.new(_('Simple')))
 
@@ -144,8 +204,9 @@ private
 		end
 		hbox = Gtk::HBox.new(false, 6)
 		hbox.pack_start(Gtk::Label.new(_('Text code')), false, false)
-		hbox.pack_start(code, true, true)
+		hbox.pack_start(@paragraph_code, true, true)
 		apply = Gtk::Button.new(Gtk::Stock::APPLY)
+		apply.signal_connect('clicked') { update_sample }
 		hbox.pack_start(apply, false, false)
 		box_advanced.pack_start(hbox, false, false)
 
@@ -156,6 +217,40 @@ private
 	end
 
 	def update_sample
+		rewrite = false
+		if @format.show_header != @header_chk.active? or @format.show_strongs != @strongs_chk.active? or @format.paragraph_code != @paragraph_code.text
+			rewrite = true
+		end
+
+		@format.show_header = @header_chk.active?
+		@format.show_strongs = @strongs_chk.active?
+		@format.verses_ss = @verses_ss.active?
+		@format.strongs_ss = @strongs_ss.active?
+
+		@format.text_color = color_s(@text_color.color)
+		@format.text_bg_color = color_s(@text_bg_color.color)
+		@format.header_color = color_s(@header_color.color)
+		@format.verses_color = color_s(@verses_color.color)
+		@format.strongs_color = color_s(@strongs_color.color)
+
+		@format.text_font = @text_font.font_name
+		@format.header_font = @header_font.font_name
+		@format.verses_font = @verses_font.font_name
+		@format.strongs_font = @strongs_font.font_name
+
+		@format.paragraph_code = @paragraph_code.text
+
+		@text.set_format(@format, rewrite)
+	end
+
+	def color_s(c)
+		r = (c.red / 256).to_s(16)
+		r = "0#{r}" if r.length == 1
+		g = (c.green / 256).to_s(16)
+		g = "0#{g}" if g.length == 1
+		b = (c.blue / 256).to_s(16)
+		b = "0#{b}" if b.length == 1
+		return "##{r}#{g}#{b}"
 	end
 
 end

@@ -52,7 +52,6 @@ class BibleText < Gtk::ScrolledWindow
 			@tag_bank[n] = @buffer.create_tag(nil, {})
 		end
 		@buffer.signal_connect('mark-set') do |w, iter, mark|
-			# TODO this is repeating several times
 			if iter.tags != []
 				ref = @tags.index(iter.tags[0])
 				if ref != @last_ref
@@ -67,7 +66,8 @@ class BibleText < Gtk::ScrolledWindow
 	#
 	# Adjust format tag
 	#
-	def set_format
+	def set_format(format=nil, rewrite=false)
+		@format = format if format != nil
 		@textview.modify_font(Pango::FontDescription.new(@format.text_font))
 		@textview.modify_text(Gtk::STATE_NORMAL, Gdk::Color.parse(@format.text_color))
 
@@ -76,12 +76,18 @@ class BibleText < Gtk::ScrolledWindow
 
 		@verses_tag.font = @format.verses_font
 		@verses_tag.foreground = @format.verses_color
+		if @format.verses_ss
+			@verses_tag.size = (@verses_tag.size.to_f * 0.67).to_i
+			@verses_tag.rise = 15
+		end
 		# TODO superscript
 
-		@tag_bank.each do |tag| 
-			tag.background = '#D0FFFF'
+		@tag_bank.each do |tag|
+			tag.background = @format.text_bg_color
 			tag.background_set = false
 		end
+
+		show_verses(@verses, @header) if rewrite
 	end
 
 
@@ -96,9 +102,10 @@ class BibleText < Gtk::ScrolledWindow
 		@last_selected = []
 		@marks = {}
 		@verses = verses.clone
+		@header = header
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		iter = @buffer.start_iter
-		@buffer.insert(iter, header + "\n", @header_tag)
+		@buffer.insert(iter, header + "\n", @header_tag) if @format.show_header
 		i = 0
 		verses.each do |ref|
 			@tags[ref] = @tag_bank[i]; i += 1
@@ -114,7 +121,7 @@ class BibleText < Gtk::ScrolledWindow
 					when 'C'
 						@buffer.insert(iter, ref[1].to_s, @verses_tag)
 					when 'A'
-						@buffer.insert(iter, @bible.abbr(ref[0]), @verses_tag)
+						@buffer.insert(iter, @bible.book_abbr(ref[0]), @verses_tag)
 					when 'V'
 						@buffer.insert(iter, ref[2].to_s, @verses_tag)
 					when 'T'

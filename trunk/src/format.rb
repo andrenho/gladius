@@ -26,8 +26,8 @@ class Format
 		f.text_font = 'Serif 11' if f.text_font == nil
 		f.text_color = $config[abbr, 'text_color']
 		f.text_color = '#000000' if f.text_color == nil
-		f.text_bg_color = $config[abbr, 'text_color']
-		f.text_bg_color = '#AAAAFF' if f.text_color == nil
+		f.text_bg_color = $config[abbr, 'text_bg_color']
+		f.text_bg_color = '#EEEEFF' if f.text_bg_color == nil
 
 		f.header_font = $config[abbr, 'header_font']
 		f.header_font = 'Serif Bold 14' if f.header_font == nil
@@ -41,7 +41,7 @@ class Format
 		f.verses_color = $config[abbr, 'verses_color']
 		f.verses_color = '#000000' if f.verses_color == nil
 		f.verses_ss = $config[abbr, 'verses_ss']
-		f.verses_ss = true if f.verses_ss == nil
+		f.verses_ss = false if f.verses_ss == nil
 
 		f.strongs_font = $config[abbr, 'strongs_font']
 		f.strongs_font = 'Serif 8' if f.strongs_font == nil
@@ -56,6 +56,28 @@ class Format
 		f.paragraph_code = FormatOptions::OLD_BIBLE
 
 		return f
+	end
+
+	def save(abbr)
+		$config[abbr, 'text_font'] = @text_font
+		$config[abbr, 'text_color'] = @text_color
+		$config[abbr, 'text_bg_color'] = @text_bg_color
+
+		$config[abbr, 'header_font'] = @header_font
+		$config[abbr, 'header_color'] = @header_color
+		$config[abbr, 'show_header'] = @show_header
+
+		$config[abbr, 'verses_font'] = @verses_font
+		$config[abbr, 'verses_color'] = @verses_color 
+		$config[abbr, 'verses_ss'] = @verses_ss
+
+		$config[abbr, 'strongs_font'] = @strongs_font
+		$config[abbr, 'strongs_color'] = @strongs_color
+		$config[abbr, 'strongs_ss'] = @strongs_ss
+		$config[abbr, 'show_strongs'] = @show_strongs
+		
+		$config[abbr, 'paragraph_code'] = @paragraph_code
+		p "saved #{abbr}"
 	end
 
 end
