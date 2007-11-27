@@ -51,7 +51,7 @@ class BibleText < Gtk::ScrolledWindow
 		(0..200).each do |n|
 			@tag_bank[n] = @buffer.create_tag(nil, {})
 		end
-		@buffer.signal_connect('mark-set') do |w, iter, mark|
+		@h = @buffer.signal_connect('mark-set') do |w, iter, mark|
 			if iter.tags != []
 				ref = @tags.index(iter.tags[0])
 				if @view.kind_of? View
@@ -133,7 +133,7 @@ class BibleText < Gtk::ScrolledWindow
 			@tags[ref] = @tag_bank[i]; i += 1
 			@marks[[ref[0], ref[1], ref[2]]] = @buffer.create_mark(nil, iter, true)
 			pos = 0
-			verse, paragraph = @bible.verse(ref[0], ref[1], ref[2])
+			verse, bop, eop = @bible.verse(ref[0], ref[1], ref[2])
 			if search_terms == nil
 				while @format.paragraph_code[pos..pos] != '' and @format.paragraph_code[pos..pos] != nil
 					case @format.paragraph_code[pos..pos]
@@ -149,7 +149,9 @@ class BibleText < Gtk::ScrolledWindow
 						when 'V'
 							@buffer.insert(iter, ref[2].to_s, @verses_tag)
 						when 'T'
+#							@buffer.insert(iter, ' ')
 							@buffer.insert(iter, verse, @tags[ref])
+#							@buffer.insert(iter, ' ')
 						when 'K'
 							if bop == 1
 								@buffer.insert(iter, verse[0..0], @tags[ref], @tag_paragraph)
@@ -171,7 +173,7 @@ class BibleText < Gtk::ScrolledWindow
 					pos += 1
 				end
 			else
-				text, tmp = @bible.verse(ref[0], ref[1], ref[2])
+				text, tmp, tmp2 = @bible.verse(ref[0], ref[1], ref[2])
 				reference = "#{@bible.book_abbr(ref[0])} #{ref[1].to_s}:#{ref[2].to_s}  "
 				@buffer.insert(iter, reference, @verses_tag)
 				@buffer.insert(iter, text, @tags[ref])
@@ -190,14 +192,16 @@ class BibleText < Gtk::ScrolledWindow
 	# Select the given verse
 	#
 	def select_verse(book, chapter, verse)
-		if @last_selected != [book, chapter, verse] and @last_selected != []
-			@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
-		end
-		if @tags[[book, chapter, verse]] != nil
-			@last_selected = [book, chapter, verse]
-			@tags[[book, chapter, verse]].background_set = true
-			@textview.scroll_to_mark(@marks[[book, chapter, verse]], 0.1, false, 0, 0.3)
-		end
+#		@buffer.signal_handler_block(@h) do
+			if @last_selected != [book, chapter, verse] and @last_selected != []
+				@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
+			end
+			if @tags[[book, chapter, verse]] != nil
+				@last_selected = [book, chapter, verse]
+				@tags[[book, chapter, verse]].background_set = true
+				@textview.scroll_to_mark(@marks[[book, chapter, verse]], 0.1, false, 0, 0.3)
+			end
+#		end
 	end
 
 
