@@ -81,7 +81,7 @@ class Main < Gtk::Window
 		file_new = Gtk::ImageMenuItem.new(Gtk::Stock::NEW)
 		file_new_menu = Gtk::Menu.new
 		file_new.set_submenu(file_new_menu)
-		file_menu.append(file_new)
+		# TODO file_menu.append(file_new)
 
 		# File -> New -> Topic Study (...)
 		file_new_study = Gtk::MenuItem.new(_('Topic Study') + _('(Not Implemented)'))

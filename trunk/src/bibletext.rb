@@ -68,6 +68,7 @@ class BibleText < Gtk::ScrolledWindow
 			end
 		end
 		@found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
+		@tag_paragraph = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
 	end
 
 
@@ -132,6 +133,7 @@ class BibleText < Gtk::ScrolledWindow
 			@tags[ref] = @tag_bank[i]; i += 1
 			@marks[[ref[0], ref[1], ref[2]]] = @buffer.create_mark(nil, iter, true)
 			pos = 0
+			verse, paragraph = @bible.verse(ref[0], ref[1], ref[2])
 			if search_terms == nil
 				while @format.paragraph_code[pos..pos] != '' and @format.paragraph_code[pos..pos] != nil
 					case @format.paragraph_code[pos..pos]
@@ -147,13 +149,18 @@ class BibleText < Gtk::ScrolledWindow
 						when 'V'
 							@buffer.insert(iter, ref[2].to_s, @verses_tag)
 						when 'T'
-							@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[ref])
+							@buffer.insert(iter, verse, @tags[ref])
 						when 'K'
-							@buffer.insert(iter, @bible.verse(ref[0], ref[1], ref[2]), @tags[ref])
+							if bop == 1
+								@buffer.insert(iter, verse[0..0], @tags[ref], @tag_paragraph)
+								@buffer.insert(iter, verse[1..-1], @tags[ref])
+							else
+								@buffer.insert(iter, verse, @tags[ref])
+							end
 						when 'n'
 							@buffer.insert(iter, "\n", @tags[ref])
 						when 'p'
-							@buffer.insert(iter, "\n", @tags[ref])
+							@buffer.insert(iter, "\n", @tags[ref]) if eop == 1
 						else
 							@buffer.insert(iter, @format.paragraph_code[pos-1..pos])
 						end
@@ -164,7 +171,7 @@ class BibleText < Gtk::ScrolledWindow
 					pos += 1
 				end
 			else
-				text = @bible.verse(ref[0], ref[1], ref[2])
+				text, tmp = @bible.verse(ref[0], ref[1], ref[2])
 				reference = "#{@bible.book_abbr(ref[0])} #{ref[1].to_s}:#{ref[2].to_s}  "
 				@buffer.insert(iter, reference, @verses_tag)
 				@buffer.insert(iter, text, @tags[ref])

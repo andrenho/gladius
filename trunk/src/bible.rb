@@ -2,6 +2,17 @@ class Bible
 
 	def initialize(bible)
 		@db = SQLite3::Database.new("#{HOME}/#{bible.downcase}.bible")
+		@db.execute("ATTACH DATABASE [#{HOME}/data.db] AS data")
+		@db.execute("
+			CREATE TEMPORARY VIEW bible_p AS 
+						   SELECT b.*
+			                    , p.bop AS bop
+			                    , p.eop AS eop
+			                 FROM bible b
+			                    , data.paragraphs p 
+			                WHERE b.book = p.book 
+			                  AND b.chapter = p.chapter 
+			                  AND b.verse = p.verse")
 		@db.results_as_hash = true
 	end
 
@@ -11,7 +22,8 @@ class Bible
 
 	def verse(book, chapter, verse)
 		# TODO optimize to cache verses
-		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
+		rs = @db.get_first_row("SELECT text, bop, eop FROM bible_p WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
+		return rs['text'], rs['bop'].to_i, rs['eop'].to_i
 	end
 
 	def search(text, match, partial, range)
