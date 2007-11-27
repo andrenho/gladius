@@ -110,6 +110,8 @@ class Search < View
 		$main.current_view = self
 	end
 
+	def current_buffer; @text.buffer; end
+
 	#
 	# Copy verses screen
 	def copy_verses

@@ -55,7 +55,7 @@ class Books < Gtk::Frame
 		add(scroll)
 	end
 
-	def go_to(book, chapter)
+	def select_verse(book, chapter)
 		@view.expand_row(Gtk::TreePath.new("#{book-1}"), false)
 		path = Gtk::TreePath.new("#{book-1}:#{chapter-1}")
 		@view.set_cursor(path, @col, false)

@@ -471,6 +471,7 @@ class Main < Gtk::Window
 		@current_chapter = chapter
 		@current_verse = verse
 		@views.each { |bv| bv.select_verse(book, chapter, verse) }
+		@books.select_verse(book, chapter)
 	end
 
 

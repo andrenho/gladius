@@ -88,7 +88,7 @@ class BibleText < Gtk::ScrolledWindow
 			@verses_tag.size = (@verses_tag.size.to_f * 0.67).to_i
 			@verses_tag.rise = (6 * Pango::SCALE)
 		else
-			@verses_tag.size = @format.verses_font.split.last.to_i
+			#@verses_tag.size = @format.verses_font.split.last.to_i
 			@verses_tag.rise = 0
 		end
 		# TODO superscript
