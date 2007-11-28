@@ -19,6 +19,28 @@ class Format
 
 	attr_accessor :paragraph_code
 
+	def initialize
+		@text_font = 'Serif 11'
+		@text_color = '#000000'
+		@text_bg_color = '#EEEEFF'
+		
+		@header_font = 'Serif Bold 14'
+		@header_color = '#000000'
+		@show_header = true
+
+		@verses_font = 'Serif 11'
+		@verses_color = '#000000'
+		@verses_ss = false
+
+		@strongs_font = 'Serif 8'
+		@strongs_color = '#000000'
+		@strongs_ss = true
+		@show_strongs = true
+
+		@paragraph_code = FormatOptions::OLD_BIBLE
+	end
+
+
 	def Format.load(abbr)
 		f = Format.new
 		
@@ -53,7 +75,7 @@ class Format
 		f.show_strongs = true if f.show_strongs == nil
 
 		f.paragraph_code = $config[abbr, 'paragraph_code']
-		f.paragraph_code = FormatOptions::OLD_BIBLE
+		f.paragraph_code = Format::OLD_BIBLE if f.paragraph_code == nil
 
 		return f
 	end

@@ -133,6 +133,7 @@ require "#{SRC}/formatoptions"
 require "#{SRC}/bibleviewoptions"
 require "#{SRC}/books"
 require "#{SRC}/bookmarks"
+require "#{SRC}/copyverses"
 require "#{I18N}/i18n"
 
 # 

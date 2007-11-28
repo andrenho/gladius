@@ -1,5 +1,8 @@
 class Bible
 
+	#
+	# Initialize a bible
+	#
 	def initialize(bible)
 		@db = SQLite3::Database.new("#{HOME}/#{bible.downcase}.bible")
 		@db.execute("ATTACH DATABASE [#{HOME}/data.db] AS data")
@@ -16,16 +19,28 @@ class Bible
 		@db.results_as_hash = true
 	end
 
+
+	# 
+	# Return the number of verses in a given chapter
+	#
 	def n_verses(book, chapter)
 		return @db.get_first_value("SELECT max(verse) FROM bible WHERE book=#{book} AND chapter = #{chapter} GROUP BY book, chapter").to_i
 	end
 
+
+	#
+	# Returns a array with the verses and the paragraphs
+	#
 	def verse(book, chapter, verse)
 		# TODO optimize to cache verses
 		rs = @db.get_first_row("SELECT text, bop, eop FROM bible_p WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
 		return rs['text'], rs['bop'].to_i, rs['eop'].to_i
 	end
 
+
+	# 
+	# Search a given term in the bible
+	#
 	def search(text, match, partial, range)
 		sql = "SELECT b.*, k.abbr 
 		         FROM bible b, books k 
@@ -94,26 +109,58 @@ class Bible
 		end
 	end
 
+
+	#
+	# Parse a set of bible links, return a array of arrays with the
+	# references.
+	#
+	def parse(text)
+	end
+
+
+	# 
+	# Return the name of the bible
+	#
 	def name
 		return @db.get_first_value("SELECT variable FROM info WHERE content='name'")
 	end
 
+
+	# 
+	# Return the abbreviation of the bible
+	#
 	def abbr
 		return @db.get_first_value("SELECT variable FROM info WHERE content='abbr'")
 	end
 
+
+	#
+	# Return the name of a given book
+	#
 	def book_name(book)
 		return @db.get_first_value("SELECT name FROM books WHERE id=#{book}")
 	end
 
+
+	# 
+	# Return the abbreviation of a given book
+	#
 	def book_abbr(book)
 		return @db.get_first_value("SELECT abbr FROM books WHERE id=#{book}")
 	end
 
+
+	# 
+	# Returns the last chapter of a given book
+	#
 	def last_chapter(book)
 		return @db.get_first_value("SELECT max(chapter) FROM bible WHERE book=#{book}").to_i
 	end
 
+
+	#
+	# CLASS METHODS
+	#
 	def Bible.language(file)
 		db = SQLite3::Database.new(file)
 		x = db.get_first_value("SELECT variable FROM info WHERE content='language'")
