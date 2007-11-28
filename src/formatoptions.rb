@@ -5,6 +5,8 @@ class FormatOptions < Gtk::VBox
 	PARAGRAPHS = '%V%T %p'
 	PARAGRAPHS_NO_VERSES = '%T %p'
 
+	attr_reader :tabs
+
 	def initialize(format, parent, bible, book=43, chapter=3, page=1)
 		super(false, 6)
 		@bible = bible
@@ -22,7 +24,7 @@ private
 	def add_controls(book, chapter, page)
 		@book = book; @chapter = chapter
 
-		tabs = Gtk::Notebook.new
+		@tabs = Gtk::Notebook.new
 
 		frame_font = Gtk::Frame.new(_('Fonts'))
 		frame_paragraph = Gtk::VBox.new
@@ -30,7 +32,6 @@ private
 		add_paragraph_controls(frame_paragraph)
 
 		textframe = Gtk::Frame.new(_('Sample'))
-		textframe.shadow_type = Gtk::SHADOW_IN
 		@text = BibleText.new(@bible, @format, @parent)
 		@text.border_width = 6
 		@verses = []
@@ -38,16 +39,16 @@ private
 		@text.show_verses(@verses, "#{@bible.book_name(book)} #{chapter}")
 		textframe.add(@text)
 
-		tabs.append_page(frame_font, Gtk::Label.new(_('Font')))
-		tabs.append_page(frame_paragraph, Gtk::Label.new(_('Paragraph')))
+		@tabs.append_page(frame_font, Gtk::Label.new(_('Font')))
+		@tabs.append_page(frame_paragraph, Gtk::Label.new(_('Paragraph')))
 
-		self.pack_start(tabs, false, false)
+		self.pack_start(@tabs, false, false)
 		self.pack_start(textframe, true, true)
 
 		update_sample
 
 		show_all
-		tabs.page = page - 1
+		@tabs.page = page - 1
 	end
 
 	def add_font_controls(frame)

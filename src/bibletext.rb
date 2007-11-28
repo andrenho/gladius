@@ -7,6 +7,8 @@ class BibleText < Gtk::ScrolledWindow
 	#
 	def initialize(bible, format, view)
 		super()
+		set_shadow_type(Gtk::SHADOW_IN)
+
 		@bible = bible
 		@format = format
 		@view = view
@@ -87,7 +89,7 @@ class BibleText < Gtk::ScrolledWindow
 		@verses_tag.foreground = @format.verses_color
 		if @format.verses_ss
 			@verses_tag.size = (@verses_tag.size.to_f * 0.67).to_i
-			@verses_tag.rise = (6 * Pango::SCALE)
+			@verses_tag.rise = (4 * Pango::SCALE)
 		else
 			#@verses_tag.size = @format.verses_font.split.last.to_i
 			@verses_tag.rise = 0

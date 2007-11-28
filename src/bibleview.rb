@@ -241,6 +241,7 @@ class BibleView < View
 	# Open Copy Verses Window
 	#
 	def copy_verses
+		CopyVerses.new(@bible, '').show
 	end
 
 
