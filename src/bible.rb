@@ -115,6 +115,43 @@ class Bible
 	# references.
 	#
 	def parse(text)
+		list = []
+		text = text.split(/[\n;]/)
+		text.each do |t|
+			dec = t.scan(/(.+)\ +([0-9]+)[:|\.]([0-9\-,\ ]+)/)[0]
+			p "1 --> "
+			p dec
+			book = @db.get_first_value("
+				SELECT id
+				  FROM books
+				 WHERE abbr = '#{dec[0]}'
+				    OR name = '#{dec[0]}'").to_i
+			chapter = dec[1].to_i
+			verse_list = []
+			if dec[2] != nil
+				dec[2].split(',').each do |v|
+					p "2 --> "
+					p v
+					verses = v.split('-')
+					p "3 -->"
+					p verses
+					if verses.length == 1
+						verse_list << verses[0].to_i
+					else
+						verses[0].to_i.upto(verses[1].to_i) { |i| verse_list << i }
+					end
+				end
+			else
+				1.upto(self.n_verses(book, chapter)) { |i| verse_list << i }
+			end
+			verses = []
+			verse_list.each do |verse|
+				verses << [book, chapter, verse]
+			end
+			list << verses
+		end
+
+		return list
 	end
 
 
