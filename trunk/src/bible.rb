@@ -119,8 +119,7 @@ class Bible
 		text = text.split(/[\n;]/)
 		text.each do |t|
 			dec = t.scan(/(.+)\ +([0-9]+)[:|\.]([0-9\-,\ ]+)/)[0]
-			p "1 --> "
-			p dec
+			dec = t.scan(/(.+)\ +([0-9]+)/)[0] if dec == nil
 			book = @db.get_first_value("
 				SELECT id
 				  FROM books
@@ -130,11 +129,7 @@ class Bible
 			verse_list = []
 			if dec[2] != nil
 				dec[2].split(',').each do |v|
-					p "2 --> "
-					p v
 					verses = v.split('-')
-					p "3 -->"
-					p verses
 					if verses.length == 1
 						verse_list << verses[0].to_i
 					else
