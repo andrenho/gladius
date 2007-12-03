@@ -54,7 +54,11 @@ class Search < View
 		@last_mark_set = nil
 		@search_term = text
 		@bible = bibleview.bible
-		@format = bibleview.format
+
+		# Adjust format
+		@format = bibleview.format.clone
+		@format.paragraph_code = "%T [%A %C:%V]\\n"
+		@format.verses_ss = false
 	end
 
 	def show_results(rs)
@@ -62,7 +66,7 @@ class Search < View
 
 		verses = []
 		rs.each do |row|
-			verses << [row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]
+			verses << [[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]]
 		end
 		@text.show_verses(verses, nil, @search_term)
 
