@@ -29,19 +29,32 @@ class Search < View
 		@hbox.pack_start(Gtk::VSeparator.new, false, false)
 
 		@search_vbox = Gtk::VBox.new(false, 12)
+		@search_vbox.border_width = 12
 		search_label = Gtk::Label.new(_('Searching...'))
-		search_image = Gtk::Image.new("#{IMG}/book.gif")
+		# search_image = Gtk::Image.new("#{IMG}/book.gif")
 		search_cancel = Gtk::Button.new(Gtk::Stock::CANCEL)
 		af = Gtk::AspectFrame.new('', 0.5, 0.5, 1, true)
 		af.shadow_type = Gtk::SHADOW_NONE
 		af.add(search_cancel)
+		@progress = Gtk::ProgressBar.new
+		@progress.text = _('Preparing...')
+		@progress.activity_mode = true
 		@search_vbox.pack_start(search_label, false, false)
-		@search_vbox.pack_start(search_image, false, false)
+		#@search_vbox.pack_start(search_image, false, false)
+		@search_vbox.pack_start(@progress, false, false)
 		@search_vbox.pack_start(af, false, false)
 		@vbox.pack_start(@search_vbox, true, false)
 		show_all
 		Thread.abort_on_exception = true
 		@tags = {}
+		@search_done = false
+		pulse_thread = Thread.new do 
+			while not @search_done
+				@progress.pulse
+				sleep 0.4
+			end
+			@progress.activity_mode = false
+		end
 		thread = Thread.new do
 			rs = bibleview.bible.search(text, match, partial, range)
 			show_results(rs)
@@ -59,6 +72,7 @@ class Search < View
 		@format = bibleview.format.clone
 		@format.paragraph_code = "%T [%A %C:%V]\\n"
 		@format.verses_ss = false
+
 	end
 
 	def show_results(rs)
@@ -66,9 +80,10 @@ class Search < View
 
 		verses = []
 		rs.each do |row|
-			verses << [[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i]]
+			verses << [[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i, row['text']]]
 		end
-		@text.show_verses(verses, nil, @search_term)
+		@search_done = true
+		@text.show_verses(verses, nil, @search_term, @progress)
 
 		@text.show_all
 		@vbox.remove(@search_vbox)

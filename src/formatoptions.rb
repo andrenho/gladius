@@ -5,7 +5,7 @@ class FormatOptions < Gtk::VBox
 	PARAGRAPHS = '%V%T {\\n}'
 	PARAGRAPHS_NO_VERSES = '%T {\\n}'
 
-	attr_reader :tabs
+	attr_reader :tabs, :text
 
 	def initialize(format, parent, bible, book=43, chapter=3, page=1)
 		super(false, 6)
