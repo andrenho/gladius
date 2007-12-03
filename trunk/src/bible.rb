@@ -20,6 +20,38 @@ class Bible
 	end
 
 
+	#
+	# Return a array with the verses on the chapter, for the main
+	# bible visualization.
+	# 
+	def chapter(book, ch)
+		verse_list = []
+		verses = []
+		# TODO use bible_p
+		@db.execute("
+			SELECT b.book
+			     , b.chapter
+				 , b.verse
+				 , b.text
+				 , p.bop
+			  FROM bible b
+			     , paragraphs p
+			 WHERE b.book    = p.book
+			   AND b.chapter = p.chapter
+			   AND b.verse   = p.verse
+			   AND b.book    = #{book}
+			   AND b.chapter = #{ch}
+		  ORDER BY b.verse").each do |rs|
+			if rs['bop'].to_i == 1 and verses != []
+				verse_list << verses
+				verses = []
+			end
+			verses << [rs['book'].to_i, rs['chapter'].to_i, rs['verse'].to_i, rs['text']]
+		end
+		verse_list << verses
+		return verse_list
+	end
+
 	# 
 	# Return the number of verses in a given chapter
 	#
@@ -32,9 +64,7 @@ class Bible
 	# Returns a array with the verses and the paragraphs
 	#
 	def verse(book, chapter, verse)
-		# TODO optimize to cache verses
-		rs = @db.get_first_row("SELECT text, bop, eop FROM bible_p WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
-		return rs['text'], rs['bop'].to_i, rs['eop'].to_i
+		return @db.get_first_value("SELECT text FROM bible WHERE book=#{book} AND chapter = #{chapter} AND verse = #{verse}")
 	end
 
 
