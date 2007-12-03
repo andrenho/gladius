@@ -115,17 +115,21 @@ class BibleText < Gtk::ScrolledWindow
 	#
 	# Clear the text box, and display the verses that are passed as an array
 	#
-	def show_verses(paragraphs, header=nil, search_terms=nil)
+	def show_verses(paragraphs, header=nil, search_terms=nil, progress=nil)
 		@paragraphs = paragraphs
 		@header = header
-
-		p @view
-		p "Create verses"
 
 		# create verses
 		@parts = []
 		i = 0
+		n_paragraphs = paragraphs.length.to_f
 		paragraphs.each do |paragraph|
+			
+			if progress != nil
+				progress.fraction += 1.to_f / n_paragraphs * 0.1
+				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+			end
+
 			next_letter_bold = false
 			paragraph.each do |verse|
 				@format.parsed_paragraph_code.each do |ppc|
@@ -182,14 +186,18 @@ class BibleText < Gtk::ScrolledWindow
 			end
 		end
 
-		p @view
-		p "Show verses"
-
 		# Show verses
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		iter = @buffer.start_iter
 		@buffer.insert(iter, header + "\n", @header_tag) if @format.show_header and header != nil
+		n_parts = @parts.length
 		@parts.each do |vp|
+
+			if progress != nil
+				progress.fraction += 1.to_f / n_parts * 0.7
+				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+			end
+
 			vp.begin = iter.offset
 			if vp.type == VersePart::VERSE
 				@buffer.insert(iter, vp.text, @verses_tag)
@@ -198,25 +206,28 @@ class BibleText < Gtk::ScrolledWindow
 					@buffer.insert(iter, vp.text[0..0], @tag_paragraph)
 					@buffer.insert(iter, vp.text[1..-1])
 				else
-					@buffer.insert(iter, vp.text)
+					@buffer.insert(iter, vp.text) if vp.text != nil
 				end
 			end
 			vp.end = iter.offset
 		end
 
-		p @view
-		p "Search terms"
-
 		# Search terms
 		if search_terms != nil
-			search_terms.each do |term|
+			n_paragraphs /= search_terms.split.length
+			search_terms.split.each do |term|
 				i = []
 				i[1] = @buffer.start_iter
 				while (i = i[1].forward_search(term, Gtk::TextIter::SEARCH_TEXT_ONLY, nil)) != nil
 					@buffer.apply_tag(@found_tag, i[0], i[1])
+					if progress != nil
+						progress.fraction += 1.to_f / n_paragraphs.to_f * 0.2
+						progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+					end
 				end
 			end
 		end
+
 	end
 
 

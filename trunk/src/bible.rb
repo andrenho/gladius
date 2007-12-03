@@ -17,6 +17,13 @@ class Bible
 			                  AND b.chapter = p.chapter 
 			                  AND b.verse = p.verse")
 		@db.results_as_hash = true
+
+		@cache_book_name = []
+		@cache_book_abbr = []
+		@db.execute("SELECT * FROM books ORDER BY id") do |row|
+			@cache_book_name << row['name']
+			@cache_book_abbr << row['abbr']
+		end
 	end
 
 
@@ -200,7 +207,7 @@ class Bible
 	# Return the name of a given book
 	#
 	def book_name(book)
-		return @db.get_first_value("SELECT name FROM books WHERE id=#{book}")
+		return @cache_book_name[book-1]
 	end
 
 
@@ -208,7 +215,7 @@ class Bible
 	# Return the abbreviation of a given book
 	#
 	def book_abbr(book)
-		return @db.get_first_value("SELECT abbr FROM books WHERE id=#{book}")
+		return @cache_book_abbr[book-1]
 	end
 
 

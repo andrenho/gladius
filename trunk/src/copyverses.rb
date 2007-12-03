@@ -60,8 +60,8 @@ private
 	end
 
 	def update_sample
-		texts = @bible.parse(@text.buffer.text)
-		p texts
+		verses = @bible.parse(@text.buffer.text)
+		@options.text.show_verses(verses)
 	end
 
 	def copy_verses
