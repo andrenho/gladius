@@ -28,7 +28,14 @@ private
 		scroll.shadow_type = Gtk::SHADOW_IN
 		scroll.border_width = 6
 		scroll.add(@text)
-		frame.add(scroll)
+		@error = Gtk::Label.new('<b>' + _('There was a error parsing one of the verses supplied.') + '</b>')
+		@error.wrap = true
+		@error.width_request = 120
+
+		vbox_frame = Gtk::VBox.new(false, 0) #6)
+		vbox_frame.pack_start(scroll, true, true)
+		vbox_frame.pack_start(@error, false, false, 6)
+		frame.add(vbox_frame)
 
 		@text.signal_connect('focus-out-event') do
 			update_sample
@@ -57,11 +64,17 @@ private
 		add(vbox)
 
 		show_all
+		@error.hide
 	end
 
 	def update_sample
-		verses = @bible.parse(@text.buffer.text)
+		verses, ok = @bible.parse(@text.buffer.text)
 		@options.text.show_verses(verses)
+		if ok
+			@error.hide
+		else
+			@error.show
+		end
 	end
 
 	def copy_verses

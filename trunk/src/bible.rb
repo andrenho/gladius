@@ -152,38 +152,53 @@ class Bible
 	# references.
 	#
 	def parse(text)
+		ok = true
 		list = []
 		text = text.split(/[\n;]/)
 		text.each do |t|
-			dec = t.scan(/(.+)\ +([0-9]+)[:|\.]([0-9\-,\ ]+)/)[0]
-			dec = t.scan(/(.+)\ +([0-9]+)/)[0] if dec == nil
-			book = @db.get_first_value("
-				SELECT id
-				  FROM books
-				 WHERE abbr = '#{dec[0]}'
-				    OR name = '#{dec[0]}'").to_i
-			chapter = dec[1].to_i
-			verse_list = []
-			if dec[2] != nil
-				dec[2].split(',').each do |v|
-					verses = v.split('-')
-					if verses.length == 1
-						verse_list << verses[0].to_i
-					else
-						verses[0].to_i.upto(verses[1].to_i) { |i| verse_list << i }
+			begin
+				dec = t.scan(/(.+)\ +([0-9]+)[:|\.]([0-9\-,\ ]+)/)[0]
+				dec = t.scan(/(.+)\ +([0-9]+)/)[0] if dec == nil
+				book = @db.get_first_value("
+					SELECT id
+					  FROM books
+					 WHERE abbr = '#{dec[0]}'
+					    OR name = '#{dec[0]}'").to_i
+				chapter = dec[1].to_i
+				verse_list = []
+				if dec[2] != nil
+					dec[2].split(',').each do |v|
+						verses = v.split('-')
+						if verses.length == 1
+							verse_list << verses[0].to_i
+						else
+							verses[0].to_i.upto(verses[1].to_i) { |i| verse_list << i }
+						end
 					end
+				else
+					1.upto(self.n_verses(book, chapter)) { |i| verse_list << i }
 				end
-			else
-				1.upto(self.n_verses(book, chapter)) { |i| verse_list << i }
+				verses = []
+				verse_list.each do |verse|
+					verses << [book, chapter, verse]
+				end
+				list << verses
+			rescue
+				ok = false
 			end
-			verses = []
-			verse_list.each do |verse|
-				verses << [book, chapter, verse]
-			end
-			list << verses
 		end
 
-		return list
+		# normalize
+		list.each do |paragraph|
+			paragraph.each do |verse|
+				if verse == [] or verse[0] == 0
+					paragraph.delete verse
+					ok = false
+				end
+			end
+		end
+
+		return list, ok
 	end
 
 
