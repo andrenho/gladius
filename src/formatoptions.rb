@@ -1,9 +1,9 @@
 class FormatOptions < Gtk::VBox
 
-	OLD_BIBLE = '%V. %K%n'
-	INDIVIDUAL_VERSES = '%A %C:%V %K%n'
-	PARAGRAPHS = '%V%T %p'
-	PARAGRAPHS_NO_VERSES = '%T %p'
+	OLD_BIBLE = '{%k}%V. %T\\n'
+	INDIVIDUAL_VERSES = '%T {[%B %C:%V]\\n}'
+	PARAGRAPHS = '%V%T {\\n}'
+	PARAGRAPHS_NO_VERSES = '%T {\\n}'
 
 	attr_reader :tabs
 
@@ -34,8 +34,7 @@ private
 		textframe = Gtk::Frame.new(_('Sample'))
 		@text = BibleText.new(@bible, @format, @parent)
 		@text.border_width = 6
-		@verses = []
-		(1..@bible.n_verses(book, chapter)).each { |n| @verses << [book, chapter, n] }
+		@verses = @bible.chapter(book, chapter)
 		@text.show_verses(@verses, "#{@bible.book_name(book)} #{chapter}")
 		textframe.add(@text)
 

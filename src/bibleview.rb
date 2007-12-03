@@ -70,12 +70,12 @@ class BibleView < View
 		show_all
 		@search_frame.visible = false
 
-		begin
+		#begin
 			verse = $main.current_verse
 			select_verse($main.current_book, $main.current_chapter, verse)
 			$main.select_verse($main.current_book, $main.current_chapter, verse)
-		rescue
-		end
+		#rescue
+		#end
 	end
 
 
@@ -87,13 +87,15 @@ class BibleView < View
 		@bible_text.set_format(new_format, true)
 	end
 
+
 	# 
 	# When the user clicks a verse
 	#
 	def select_verse(book, chapter, verse)
 		if book != @displaying_book or chapter != @displaying_chapter
-			verses = []
-			(1..@bible.n_verses(book, chapter)).each { |n| verses << [book, chapter, n] }
+			#verses = []
+			#(1..@bible.n_verses(book, chapter)).each { |n| verses << [book, chapter, n] }
+			verses = @bible.chapter(book, chapter)
 			@displaying_book = book
 			@displaying_chapter = chapter
 			@bible_text.show_verses(verses, "#{@bible.book_name(book)} #{chapter}")

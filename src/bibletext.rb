@@ -1,3 +1,20 @@
+class VersePart
+	VERSE = 1
+	TEXT  = 2
+	OTHER = 3
+
+	attr_accessor :type
+	attr_accessor :verse
+	attr_accessor :text
+	attr_accessor :first_letter_bold
+	attr_accessor :begin, :end
+
+	def initialize
+		@first_letter_bold = false
+	end
+end
+
+
 class BibleText < Gtk::ScrolledWindow
 
 	attr_reader :buffer
@@ -49,25 +66,9 @@ class BibleText < Gtk::ScrolledWindow
 	def initialize_tags
 		@header_tag = @buffer.create_tag(nil, {})
 		@verses_tag = @buffer.create_tag(nil, {})
-		@tag_bank = []
-		(0..200).each do |n|
-			@tag_bank[n] = @buffer.create_tag(nil, {})
-		end
 		@h = @buffer.signal_connect('mark-set') do |w, iter, mark|
-			if iter.tags != []
-				ref = @tags.index(iter.tags[0])
-				if @view.kind_of? View
-					if ref != @last_ref
-						$main.select_verse(ref[0], ref[1], ref[2]) if ref != nil
-						@last_ref = ref
-					end
-				elsif @view.class == BibleviewOptions
-					if ref != @last_ref
-						@last_ref = ref
-						select_verse(ref[0], ref[1], ref[2]) if ref
-					end
-				end
-			end
+			offset = iter.offset
+			@parts.each { |part| p part.verse if offset.between? part.begin, part.end }
 		end
 		@found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
 		@tag_paragraph = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
@@ -91,100 +92,95 @@ class BibleText < Gtk::ScrolledWindow
 			@verses_tag.size = (@verses_tag.size.to_f * 0.67).to_i
 			@verses_tag.rise = (4 * Pango::SCALE)
 		else
-			#@verses_tag.size = @format.verses_font.split.last.to_i
 			@verses_tag.rise = 0
 		end
-		# TODO superscript
 
-		@tag_bank.each do |tag|
-			tag.background = @format.text_bg_color
-			tag.background_set = false
-		end
-
-		show_verses(@verses, @header) if rewrite
+		show_verses(@paragraphs, @header) if rewrite
 	end
 
 
 	#
 	# Clear the text box, and display the verses that are passed as an array
 	#
-	def show_verses(verses, header=nil, search_terms=nil)
-		if @tags != nil
-			@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
-		end
+	def show_verses(paragraphs, header=nil, search_terms=nil)
+		@paragraphs = paragraphs
+		@header = header
 
-		# create tags for more than 200 verses
-		if verses.length > 200
-			(201..verses.length + 2).each do |n|
-				@tag_bank[n] = @buffer.create_tag(nil, {})
-				@tag_bank[n].background = @format.text_bg_color
-				@tag_bank[n].background_set = false
+		# create verses
+		@parts = []
+		i = 0
+		paragraphs.each do |paragraph|
+			next_letter_bold = false
+			paragraph.each do |verse|
+				@format.parsed_paragraph_code.each do |ppc|
+					add = false
+					if ppc.bop 
+						add = true if verse == paragraph.first
+					elsif ppc.eop
+						add = true if verse == paragraph.last
+					else 
+						add = true
+					end
+					if add
+						if ppc.type == ParsedParagraphCode::ATTRIBUTE
+							next_letter_bold = true if ppc.value == '%k'
+						else
+							vp = VersePart.new
+							vp.verse = verse if not ppc.bop and not ppc.eop
+							vp.begin = i
+							if ppc.type == ParsedParagraphCode::TEXT
+								vp.type = VersePart::OTHER
+								vp.text = ppc.value
+							elsif ppc.type == ParsedParagraphCode::TOKEN
+								vp.type = VersePart::VERSE
+								case ppc.value
+								when '\\n'
+									vp.text = "\n"
+								when '%B'
+									vp.text = @bible.book_name(verse[0])
+								when '%A'
+									vp.text = @bible.book_abbr(verse[0])
+								when '%C'
+									vp.text = verse[1].to_s
+								when '%V'
+									vp.text = ''
+									vp.text = "#{paragraph[0][2]}-" if ppc.eop
+									vp.text += verse[2].to_s
+								when '%T'
+									vp.type = VersePart::TEXT
+									if verse[3] != nil
+										vp.text = verse[3]
+									else
+										vp.text = @bible.verse(verse[0], verse[1], verse[2])
+									end
+									if next_letter_bold
+										vp.first_letter_bold = true
+										next_letter_bold = false
+									end
+								end
+							end
+							i += vp.text.length
+							vp.end = i - 1
+							@parts << vp
+						end
+					end
+				end		
 			end
 		end
 
-		@tags = {}
-		@last_selected = []
-		@marks = {}
-		@verses = verses.clone
-		@header = header
+		# Show verses
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		iter = @buffer.start_iter
-		@buffer.insert(iter, header + "\n", @header_tag) if @format.show_header and header != nil
-		i = 0
-		verses.each do |ref|
-			@tags[ref] = @tag_bank[i]; i += 1
-			@marks[[ref[0], ref[1], ref[2]]] = @buffer.create_mark(nil, iter, true)
-			pos = 0
-			verse, bop, eop = @bible.verse(ref[0], ref[1], ref[2])
-			if search_terms == nil
-				while @format.paragraph_code[pos..pos] != '' and @format.paragraph_code[pos..pos] != nil
-					case @format.paragraph_code[pos..pos]
-					when '%'
-						pos += 1
-						case @format.paragraph_code[pos..pos]
-						when 'B'
-							@buffer.insert(iter, @bible.book_name(ref[0]), @verses_tag)
-						when 'C'
-							@buffer.insert(iter, ref[1].to_s, @verses_tag)
-						when 'A'
-							@buffer.insert(iter, @bible.book_abbr(ref[0]), @verses_tag)
-						when 'V'
-							@buffer.insert(iter, ref[2].to_s, @verses_tag)
-						when 'T'
-#							@buffer.insert(iter, ' ')
-							@buffer.insert(iter, verse, @tags[ref])
-#							@buffer.insert(iter, ' ')
-						when 'K'
-							if bop == 1
-								@buffer.insert(iter, verse[0..0], @tags[ref], @tag_paragraph)
-								@buffer.insert(iter, verse[1..-1], @tags[ref])
-							else
-								@buffer.insert(iter, verse, @tags[ref])
-							end
-						when 'n'
-							@buffer.insert(iter, "\n", @tags[ref])
-						when 'p'
-							@buffer.insert(iter, "\n", @tags[ref]) if eop == 1
-						else
-							@buffer.insert(iter, @format.paragraph_code[pos-1..pos])
-						end
-					else
-						# TODO optimize to get all chars at once
-						@buffer.insert(iter, @format.paragraph_code[pos..pos])
-					end
-					pos += 1
-				end
+		@parts.each do |vp|
+			if vp.type == VersePart::VERSE
+				@buffer.insert(iter, vp.text, @verses_tag)
 			else
-				text, tmp, tmp2 = @bible.verse(ref[0], ref[1], ref[2])
-				reference = "#{@bible.book_abbr(ref[0])} #{ref[1].to_s}:#{ref[2].to_s}  "
-				@buffer.insert(iter, reference, @verses_tag)
-				@buffer.insert(iter, text, @tags[ref])
-				get_ranges(text, search_terms).each do |rg|
-					it_start = @buffer.get_iter_at_line_index(iter.line, rg.first + reference.length)
-					it_end = @buffer.get_iter_at_line_index(iter.line, rg.last + reference.length)
-					@buffer.apply_tag(@found_tag, it_start, it_end)
+				if vp.first_letter_bold
+					@buffer.insert(iter, vp.text[0..0], @tag_paragraph)
+					@buffer.insert(iter, vp.text[1..-1])
+				else
+					@buffer.insert(iter, vp.text)
 				end
-				@buffer.insert(iter, "\n", @tags[ref])
 			end
 		end
 	end
@@ -194,6 +190,7 @@ class BibleText < Gtk::ScrolledWindow
 	# Select the given verse
 	#
 	def select_verse(book, chapter, verse)
+=begin
 #		@buffer.signal_handler_block(@h) do
 			if @last_selected != [book, chapter, verse] and @last_selected != []
 				@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
@@ -204,6 +201,7 @@ class BibleText < Gtk::ScrolledWindow
 				@textview.scroll_to_mark(@marks[[book, chapter, verse]], 0.1, false, 0, 0.3)
 			end
 #		end
+=end
 	end
 
 

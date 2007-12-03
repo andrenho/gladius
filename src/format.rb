@@ -1,3 +1,13 @@
+class ParsedParagraphCode
+	TOKEN     = 1
+	TEXT      = 2
+	ATTRIBUTE = 3
+
+	attr_accessor :type
+	attr_accessor :value
+	attr_accessor :bop, :eop
+end
+
 class Format
 
 	attr_accessor :text_font
@@ -17,7 +27,8 @@ class Format
 	attr_accessor :strongs_ss
 	attr_accessor :show_strongs
 
-	attr_accessor :paragraph_code
+	attr_reader :paragraph_code
+	attr_reader :parsed_paragraph_code
 
 	def initialize
 		@text_font = 'Serif 11'
@@ -37,7 +48,13 @@ class Format
 		@strongs_ss = true
 		@show_strongs = true
 
-		@paragraph_code = FormatOptions::OLD_BIBLE
+		self.paragraph_code = FormatOptions::OLD_BIBLE
+	end
+
+
+	def paragraph_code=(new)
+		@paragraph_code = new
+		@parsed_paragraph_code = parse(new)
 	end
 
 
@@ -99,6 +116,57 @@ class Format
 		$config[abbr, 'show_strongs'] = @show_strongs
 		
 		$config[abbr, 'paragraph_code'] = @paragraph_code
+	end
+
+
+private
+
+
+	def parse(pc)
+		i = 0
+		parsed_paragraph_code = []
+		bop = eop = false
+		current_text = ''
+		parsed = nil
+		while pc[i] != nil
+			if pc[i..i] == '{'
+				if i == 0
+					bop = true
+				else
+					eop = true
+				end
+				parsed = nil
+			elsif pc[i..i] == '}'
+				bop = eop = false
+				parsed = nil
+			elsif ['\\n', '%k', '%B', '%A', '%C', '%V', '%T'].include? pc[i..(i+1)]
+				parsed = ParsedParagraphCode.new
+				if pc[i..(i+1)] == '%k'
+					parsed.type = ParsedParagraphCode::ATTRIBUTE
+				else
+					parsed.type = ParsedParagraphCode::TOKEN
+				end
+				parsed.value = pc[i..(i+1)]
+				parsed.bop = bop
+				parsed.eop = eop
+				parsed_paragraph_code << parsed
+				parsed = nil
+				i += 1
+			else
+				if parsed == nil
+					parsed = ParsedParagraphCode.new
+					parsed.type = ParsedParagraphCode::TEXT
+					parsed.value = pc[i..i]
+					parsed.bop = bop
+					parsed.eop = eop
+					parsed_paragraph_code << parsed
+				else
+					parsed.value += pc[i..i]
+				end
+			end
+			i += 1
+		end
+		return parsed_paragraph_code
 	end
 
 end
