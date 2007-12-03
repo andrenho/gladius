@@ -191,17 +191,22 @@ private
 
 		box_advanced = Gtk::VBox.new(false, 6)
 		box_advanced.set_border_width(6)
-		box_advanced.pack_start(Gtk::Label.new('%B - ' + _('Name of the book (e.g. "Genesis")')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%A - ' + _('Abbreviation of the book (e.g. "Gen")')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%C - ' + _('Number of the chapter')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%V - ' + _('Number of the verse')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%T - ' + _('Text of the verse')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%K - ' + _('Text with the first letter bold when paragraph')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%n - ' + _('New line')), false, false)
-		box_advanced.pack_start(Gtk::Label.new('%p - ' + _('New line only if new paragraph')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%B  - ' + _('Name of the book (e.g. "Genesis")')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%A  - ' + _('Abbreviation of the book (e.g. "Gen")')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%C  - ' + _('Number of the chapter')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%V  - ' + _('Number of the verse')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%T  - ' + _('Text of the verse')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('%k  - ' + _('In the next verse, the first letter will be bold')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('\\n  - ' + _('New line')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('{ } - ' + _('The code between brackets is only executed')), false, false)
+		box_advanced.pack_start(Gtk::Label.new('      ' + _('at the beginning or the end of paragraphs')), false, false)
 		box_advanced.each do |label|
 			label.xalign = 0
-			label.modify_font(Pango::FontDescription.new('Monospaced 8'))
+			if OS == :win32
+				label.modify_font(Pango::FontDescription.new('Courier New 8'))
+			else
+				label.modify_font(Pango::FontDescription.new('Monospaced 8'))
+			end
 		end
 		hbox = Gtk::HBox.new(false, 6)
 		hbox.pack_start(Gtk::Label.new(_('Text code')), false, false)

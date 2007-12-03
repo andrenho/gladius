@@ -79,14 +79,7 @@ class BibleText < Gtk::ScrolledWindow
 	def initialize_tags
 		@header_tag = @buffer.create_tag(nil, {})
 		@verses_tag = @buffer.create_tag(nil, {})
-<<<<<<< .mine
 
-=======
-		@h = @buffer.signal_connect('mark-set') do |w, iter, mark|
-			offset = iter.offset
-			@parts.each { |part| p part.verse if offset.between? part.begin, part.end }
-		end
->>>>>>> .r52
 		@found_tag = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
 		@tag_paragraph = @buffer.create_tag(nil, { :weight => Pango::FontDescription::WEIGHT_BOLD })
 		@selected_tag = @buffer.create_tag(nil, {})
@@ -113,13 +106,9 @@ class BibleText < Gtk::ScrolledWindow
 			@verses_tag.rise = 0
 		end
 
-<<<<<<< .mine
 		@selected_tag.background = @format.text_bg_color
 
 		show_verses(@paragraphs, @header) if rewrite
-=======
-		show_verses(@paragraphs, @header) if rewrite
->>>>>>> .r52
 	end
 
 
@@ -130,7 +119,6 @@ class BibleText < Gtk::ScrolledWindow
 		@paragraphs = paragraphs
 		@header = header
 
-<<<<<<< .mine
 		p @view
 		p "Create verses"
 
@@ -191,91 +179,20 @@ class BibleText < Gtk::ScrolledWindow
 						end
 					end
 				end		
-=======
-		# create verses
-		@parts = []
-		i = 0
-		paragraphs.each do |paragraph|
-			next_letter_bold = false
-			paragraph.each do |verse|
-				@format.parsed_paragraph_code.each do |ppc|
-					add = false
-					if ppc.bop 
-						add = true if verse == paragraph.first
-					elsif ppc.eop
-						add = true if verse == paragraph.last
-					else 
-						add = true
-					end
-					if add
-						if ppc.type == ParsedParagraphCode::ATTRIBUTE
-							next_letter_bold = true if ppc.value == '%k'
-						else
-							vp = VersePart.new
-							vp.verse = verse if not ppc.bop and not ppc.eop
-							vp.begin = i
-							if ppc.type == ParsedParagraphCode::TEXT
-								vp.type = VersePart::OTHER
-								vp.text = ppc.value
-							elsif ppc.type == ParsedParagraphCode::TOKEN
-								vp.type = VersePart::VERSE
-								case ppc.value
-								when '\\n'
-									vp.text = "\n"
-								when '%B'
-									vp.text = @bible.book_name(verse[0])
-								when '%A'
-									vp.text = @bible.book_abbr(verse[0])
-								when '%C'
-									vp.text = verse[1].to_s
-								when '%V'
-									vp.text = ''
-									vp.text = "#{paragraph[0][2]}-" if ppc.eop
-									vp.text += verse[2].to_s
-								when '%T'
-									vp.type = VersePart::TEXT
-									if verse[3] != nil
-										vp.text = verse[3]
-									else
-										vp.text = @bible.verse(verse[0], verse[1], verse[2])
-									end
-									if next_letter_bold
-										vp.first_letter_bold = true
-										next_letter_bold = false
-									end
-								end
-							end
-							i += vp.text.length
-							vp.end = i - 1
-							@parts << vp
-						end
-					end
-				end		
->>>>>>> .r52
 			end
 		end
 
-<<<<<<< .mine
 		p @view
 		p "Show verses"
 
 		# Show verses
-=======
-		# Show verses
->>>>>>> .r52
 		@buffer.delete(@buffer.start_iter, @buffer.end_iter)
 		iter = @buffer.start_iter
-<<<<<<< .mine
 		@buffer.insert(iter, header + "\n", @header_tag) if @format.show_header and header != nil
 		@parts.each do |vp|
 			vp.begin = iter.offset
 			if vp.type == VersePart::VERSE
 				@buffer.insert(iter, vp.text, @verses_tag)
-=======
-		@parts.each do |vp|
-			if vp.type == VersePart::VERSE
-				@buffer.insert(iter, vp.text, @verses_tag)
->>>>>>> .r52
 			else
 				if vp.first_letter_bold
 					@buffer.insert(iter, vp.text[0..0], @tag_paragraph)
@@ -307,7 +224,6 @@ class BibleText < Gtk::ScrolledWindow
 	# Select the given verse
 	#
 	def select_verse(book, chapter, verse)
-<<<<<<< .mine
 		@parts.each do |part|
 			if part.verse
 				if part.verse[0..2] == @last_selected
@@ -326,16 +242,9 @@ class BibleText < Gtk::ScrolledWindow
 					)
 					@textview.scroll_to_iter(bgn, 0.1, false, 0, 0.3)
 				end
-=======
-=begin
-#		@buffer.signal_handler_block(@h) do
-			if @last_selected != [book, chapter, verse] and @last_selected != []
-				@tags[@last_selected].background_set = false if @tags[@last_selected] != nil
->>>>>>> .r52
 			end
 		end
 		@last_selected = [book, chapter, verse]
-=end
 	end
 
 
