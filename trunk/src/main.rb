@@ -81,7 +81,7 @@ class Main < Gtk::Window
 		file_new = Gtk::ImageMenuItem.new(Gtk::Stock::NEW)
 		file_new_menu = Gtk::Menu.new
 		file_new.set_submenu(file_new_menu)
-		# TODO file_menu.append(file_new)
+# 		file_menu.append(file_new)
 
 		# File -> New -> Topic Study (...)
 		file_new_study = Gtk::MenuItem.new(_('Topic Study') + _('(Not Implemented)'))
@@ -236,12 +236,20 @@ class Main < Gtk::Window
 		# Edit -> Preferences
 		edit_preferences = Gtk::ImageMenuItem.new(Gtk::Stock::PREFERENCES)
 		edit_preferences.signal_connect('activate') { preferences }
-		edit_menu.append(edit_preferences)
+#		edit_menu.append(edit_preferences)
 		
 		# View
 		view_menu = Gtk::Menu.new
 		view = Gtk::MenuItem.new(_('_View'))
 		view.set_submenu(view_menu)
+
+		# View -> Previous Chapter
+		view_jump = Gtk::ImageMenuItem.new(Gtk::Stock::JUMP_TO)
+		view_jump.signal_connect('activate') { jump_to }
+		view_menu.append(view_jump)
+
+		# View -> -----------
+		view_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# View -> Previous Chapter
 		view_pc = Gtk::ImageMenuItem.new(Gtk::Stock::GO_BACK)
@@ -563,6 +571,37 @@ class Main < Gtk::Window
 		raise 'Implement this method'
 	end
 	private :page_setup
+
+
+	# 
+	# Jump to
+	#
+	def jump_to
+		w = Gtk::Window.new
+		w.set_title(_('Jump to verse'))
+		w.border_width = 6
+		
+		vbox = Gtk::VBox.new(false, 6)
+		hbox = Gtk::HBox.new(false, 6)
+		entry = Gtk::Entry.new
+		jump = Gtk::Button.new(Gtk::Stock::JUMP_TO)
+		jump.flags = Gtk::Widget::CAN_DEFAULT
+		jump.signal_connect('clicked') do
+
+		end
+
+		vbox.pack_start(Gtk::Label.new(_('Type a bible reference below.')), false, false)
+		hbox.pack_start(entry, false, false)
+		hbox.pack_start(jump, false, false)
+		vbox.pack_start(hbox, false, false)
+		w.add(vbox)
+
+		w.modal = true
+		w.transient_for = self
+		w.default = jump
+		w.show_all
+	end
+	private :jump_to
 
 
 	#

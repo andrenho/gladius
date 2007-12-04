@@ -17,6 +17,7 @@ end
 
 class BibleText < Gtk::ScrolledWindow
 
+	attr_reader :paragraphs
 	attr_reader :buffer
 
 	#
@@ -163,7 +164,7 @@ class BibleText < Gtk::ScrolledWindow
 									vp.text = verse[1].to_s
 								when '%V'
 									vp.text = ''
-									vp.text = "#{paragraph[0][2]}-" if ppc.eop
+									vp.text = "#{paragraph[0][2]}-" if ppc.eop and paragraph[0][2] != verse[2]
 									vp.text += verse[2].to_s
 								when '%T'
 									vp.type = VersePart::TEXT
@@ -276,6 +277,36 @@ class BibleText < Gtk::ScrolledWindow
 			if verse != @last_ref
 				@last_ref = verse
 				select_verse(verse[0], verse[1], verse[2]) if verse
+			end
+		end
+	end
+
+	
+	# 
+	# Return a array with the selected verses
+	#
+	def selected_verses
+		if @buffer.selection_bounds == nil
+			return [[@last_selected]]
+		else
+			_begin, _end, selected = @buffer.selection_bounds
+			if selected == false
+				return [[@last_selected]]
+			else
+				verse_begin = verse_end = nil
+				@parts.each do |part| 
+					verse_begin = part.verse if _begin.offset.between? part.begin, part.end
+					verse_end = part.verse if _end.offset.between? part.begin, part.end
+				end
+				if verse_begin != nil and verse_end != nil
+					verses = []
+					verse_begin[2].upto(verse_end[2]) do |i|
+						verses << [verse_begin[0], verse_begin[1], i]
+					end
+					return [verses]
+				else
+					return [[@last_selected]]
+				end
 			end
 		end
 	end

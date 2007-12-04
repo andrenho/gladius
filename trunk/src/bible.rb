@@ -202,6 +202,20 @@ class Bible
 	end
 
 
+	#
+	# Transforms a array of references in human readable text
+	#
+	def unparse(paragraphs)
+		text = ''
+		paragraphs.each do |pa|
+			text += "#{book_abbr(pa[0][0])} #{pa[0][1]}:#{pa[0][2]}"
+			text += "-#{pa.last[2]}" if pa.length > 1
+			text += "\n"
+		end
+		return text
+	end
+
+
 	# 
 	# Return the name of the bible
 	#
