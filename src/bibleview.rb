@@ -243,7 +243,14 @@ class BibleView < View
 	# Open Copy Verses Window
 	#
 	def copy_verses
-		CopyVerses.new(@bible, '').show
+		verses = @bible_text.selected_verses
+		if verses.length == 0
+			CopyVerses.new(@bible, '').show
+		elsif verses[0].length == 1
+			CopyVerses.new(@bible, "#{@bible.book_abbr(@displaying_book)} #{@displaying_chapter}\n").show
+		else
+			CopyVerses.new(@bible, @bible.unparse(verses)).show
+		end
 	end
 
 
@@ -295,7 +302,7 @@ class BibleView < View
 
 		$main.edit_cut.sensitive = false
 		if @bible_text.buffer.selection_bounds != nil
-			$main.edit_copy.sensitive = @bible_text.buffer.selection_bounds[2]
+			$main.edit_copy.sensitive = true
 		else
 			$main.edit_copy.sensitive = false
 		end

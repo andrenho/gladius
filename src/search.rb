@@ -17,6 +17,8 @@ class Search < View
 	def initialize(bibleview, text, match, partial, range)
 		super(_('Search Results') + ": #{text}")
 
+		@n_results = 0
+
 		# Copy verses
 		cv_button = Gtk::Button.new
 		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
@@ -78,12 +80,13 @@ class Search < View
 	def show_results(rs)
 		@text = BibleText.new(@bible, @format, self)
 
-		verses = []
+		@verses = []
 		rs.each do |row|
-			verses << [[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i, row['text']]]
+			@verses << [[row['book'].to_i, row['chapter'].to_i, row['verse'].to_i, row['text']]]
+			@n_results += 1
 		end
 		@search_done = true
-		@text.show_verses(verses, nil, @search_term, @progress)
+		@text.show_verses(@verses, nil, @search_term, @progress)
 
 		@text.show_all
 		@vbox.remove(@search_vbox)
@@ -134,7 +137,15 @@ class Search < View
 	#
 	# Copy verses screen
 	def copy_verses
-		# TODO
+		ok = false
+		if @n_results > 200
+			if Util.question(_('This search has many results, and it may take a few seconds to open the copy window. Do you want to continue?')) == Gtk::Dialog::RESPONSE_YES
+				ok = true
+			end
+		else
+			ok = true
+		end
+		CopyVerses.new(@bible, @bible.unparse(@verses)) if ok
 	end
 
 	# 

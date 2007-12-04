@@ -45,4 +45,21 @@ class Util
 		d.destroy
 	end
 
+	def Util.question(message, parent=$main)
+		d = Gtk::MessageDialog.new(parent, 
+			Gtk::Dialog::DESTROY_WITH_PARENT | Gtk::Dialog::MODAL,
+			Gtk::MessageDialog::QUESTION,
+			Gtk::MessageDialog::BUTTONS_YES_NO,
+			message)
+		d.title = _('Gladius %s', BB_VERSION)
+		d.modal = true
+		d.transient_for = parent
+		r = nil
+		d.run do |response|
+			r = response
+		end
+		d.destroy
+		return r
+	end
+
 end

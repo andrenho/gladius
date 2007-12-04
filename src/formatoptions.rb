@@ -203,9 +203,9 @@ private
 		box_advanced.each do |label|
 			label.xalign = 0
 			if OS == :win32
-				label.modify_font(Pango::FontDescription.new('Courier New 8'))
+				label.modify_font(Pango::FontDescription.new('Lucida Console 7.5'))
 			else
-				label.modify_font(Pango::FontDescription.new('Monospaced 8'))
+				label.modify_font(Pango::FontDescription.new('monospace 8'))
 			end
 		end
 		hbox = Gtk::HBox.new(false, 6)

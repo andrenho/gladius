@@ -4,6 +4,16 @@ class CopyVerses < Gtk::Window
 		super()
 		@bible = bible
 		@format = Format.new
+
+		if OS == :win32
+			@format.text_font = 'Lucida Console 9'
+		else
+			@format.text_font = 'monospace 9'
+		end
+		@format.verses_font = @format.text_font
+		@format.paragraph_code = FormatOptions::INDIVIDUAL_VERSES
+		@format.show_header = false
+
 		add_controls(verses)
 	end
 
@@ -18,33 +28,39 @@ private
 		hbox = Gtk::HBox.new(false, 6)
 
 		@options = FormatOptions.new(@format, self, @bible)
+		@options.tabs.remove_page(0)
 
+		instruction = Gtk::Label.new(_('Type below the references of the verses you want to copy, and then click on \'Apply\'.'))
+		instruction.wrap = true
+		instruction.width_request = 120
 		frame = Gtk::Frame.new(_('Verses to copy'))
 		buffer = Gtk::TextBuffer.new
 		buffer.text = verses
 		@text = Gtk::TextView.new(buffer)
 		@text.width_request = 120
-		scroll = Gtk::ScrolledWindow.new
-		scroll.shadow_type = Gtk::SHADOW_IN
-		scroll.border_width = 6
-		scroll.add(@text)
-		@error = Gtk::Label.new('<b>' + _('There was a error parsing one of the verses supplied.') + '</b>')
-		@error.wrap = true
-		@error.width_request = 120
-
-		vbox_frame = Gtk::VBox.new(false, 0) #6)
-		vbox_frame.pack_start(scroll, true, true)
-		vbox_frame.pack_start(@error, false, false, 6)
-		frame.add(vbox_frame)
-
-		@text.signal_connect('focus-out-event') do
-			update_sample
-			false
-		end
 		@text.signal_connect('key-press-event') do |w, e|
 			update_sample if e.keyval == 65293 # Enter
 			false
 		end
+		scroll = Gtk::ScrolledWindow.new
+		scroll.shadow_type = Gtk::SHADOW_IN
+		scroll.add(@text)
+		@error = Gtk::Label.new
+		@error.markup = '<span foreground="red" weight="bold">' + _('There was a error parsing one of the verses supplied.') + '</span>'
+		@error.wrap = true
+		@error.width_request = 120
+		apply = Gtk::Button.new(Gtk::Stock::APPLY)
+		apply.signal_connect('clicked') do
+			update_sample
+		end
+
+		vbox_frame = Gtk::VBox.new(false, 6)
+		vbox_frame.border_width = 6
+		vbox_frame.pack_start(instruction, false, false)
+		vbox_frame.pack_start(scroll, true, true)
+		vbox_frame.pack_start(@error, false, false)
+		vbox_frame.pack_start(apply, false, false)
+		frame.add(vbox_frame)
 
 		button_box = Gtk::HButtonBox.new
 		button_box.layout_style = Gtk::ButtonBox::END
@@ -63,6 +79,8 @@ private
 		vbox.pack_start(button_box, false, false)
 		add(vbox)
 
+		update_sample
+
 		show_all
 		@error.hide
 	end
@@ -78,6 +96,9 @@ private
 	end
 
 	def copy_verses
+		clipboard = Gtk::Clipboard.get(Gdk::Selection::CLIPBOARD)
+		clipboard.text = @options.text.buffer.text
+		Util.infobox(_("The text was copied to the clipboard."))
 	end
 
 end
