@@ -254,10 +254,42 @@ class BibleView < View
 	end
 
 
+	# 
+	# Jump to
 	#
-	# Open option screen
-	#
-	def options
+	def jump_to
+		w = Gtk::Window.new
+		w.set_title(_('Jump to verse'))
+		w.border_width = 6
+		
+		vbox = Gtk::VBox.new(false, 6)
+		hbox = Gtk::HBox.new(false, 6)
+		entry = Gtk::Entry.new
+		entry.activates_default = true
+		jump = Gtk::Button.new(Gtk::Stock::JUMP_TO)
+		jump.flags = Gtk::Widget::CAN_DEFAULT
+		jump.signal_connect('clicked') do
+			paragraphs, ok = @bible.parse(entry.text)
+			if ok
+				verses = paragraphs[0]
+				$main.select_verse(verses[0][0], verses[0][1], verses[0][2])
+			else
+				Util.warning(_('Invalid reference.'))
+			end
+			w.destroy
+		end
+
+		vbox.pack_start(Gtk::Label.new(_('Type a bible reference below.')), false, false)
+		hbox.pack_start(entry, false, false)
+		hbox.pack_start(jump, false, false)
+		vbox.pack_start(hbox, false, false)
+		w.add(vbox)
+
+		w.modal = true
+		w.transient_for = self
+		w.resizable = false
+		w.default = jump
+		w.show_all
 	end
 
 
@@ -281,6 +313,14 @@ class BibleView < View
 
 
 	# 
+	# View properties
+	#
+	def properties
+		Properties.new([_('Name'), @bible.name], [_('Year'), @bible.year], [_('Comment'), @bible.comment])
+	end
+
+
+	# 
 	# Check if any menu options need to be set sensible or not
 	#
 	def refit_menus
@@ -289,6 +329,7 @@ class BibleView < View
 		$main.file_save.sensitive = false
 		$main.file_save_as.sensitive = false
 		$main.file_revert.sensitive = false
+		$main.file_properties.sensitive = true
 		if $main.views.length > 1
 			$main.file_close.sensitive = true
 			$main.views.each { |bv| bv.close_button.sensitive = true }
@@ -296,6 +337,8 @@ class BibleView < View
 			$main.file_close.sensitive = false
 			@close_button.sensitive = false
 		end
+
+		$main.view_jump.sensitive = true
 
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false
