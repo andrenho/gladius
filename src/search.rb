@@ -102,7 +102,10 @@ class Search < View
 		$main.file_save.sensitive = false
 		$main.file_save_as.sensitive = false
 		$main.file_revert.sensitive = false
+		$main.file_properties.sensitive = false
 		$main.file_close.sensitive = true
+		
+		$main.view_jump.sensitive = false
 
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false

@@ -225,6 +225,22 @@ class Bible
 
 
 	# 
+	# Return the year of the bible
+	#
+	def year
+		return @db.get_first_value("SELECT variable FROM info WHERE content='year'")
+	end
+
+
+	# 
+	# Return the description of the bible
+	#
+	def comment
+		return @db.get_first_value("SELECT variable FROM info WHERE content='info'")
+	end
+
+
+	# 
 	# Return the abbreviation of the bible
 	#
 	def abbr

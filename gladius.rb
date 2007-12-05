@@ -134,6 +134,7 @@ require "#{SRC}/bibleviewoptions"
 require "#{SRC}/books"
 require "#{SRC}/bookmarks"
 require "#{SRC}/copyverses"
+require "#{SRC}/properties"
 require "#{I18N}/i18n"
 
 # 

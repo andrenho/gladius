@@ -10,11 +10,13 @@ class Main < Gtk::Window
 	# Menu items
 	#
 	attr_reader :file_save, :file_save_as, :file_revert
+	attr_reader :file_properties
 	attr_reader :file_close
 	attr_reader :edit_undo, :edit_redo
 	attr_reader :edit_copy, :edit_cut, :edit_cv, :edit_paste
 	attr_reader :edit_find, :edit_fn, :edit_replace
 	attr_reader :edit_dt, :edit_dt_signal
+	attr_reader :view_jump
 	attr_reader :format_font, :format_paragraph
 	attr_reader :format_bold, :format_italic, :format_underline
 
@@ -136,25 +138,25 @@ class Main < Gtk::Window
 		# File -> Page Setup
 		file_ps = Gtk::MenuItem.new(_('Page Setup...'))
 		file_ps.signal_connect('activate') { page_setup }
-		file_menu.append(file_ps)
+#		file_menu.append(file_ps)
 
 		# File -> Print Preview
 		file_pp = Gtk::ImageMenuItem.new(Gtk::Stock::PRINT_PREVIEW)
 		file_pp.signal_connect('activate') { current_view.print_preview }
-		file_menu.append(file_pp)
+#		file_menu.append(file_pp)
 
 		# File -> Print...
 		file_print = Gtk::ImageMenuItem.new(Gtk::Stock::PRINT)
 		file_print.signal_connect('activate') { current_view.print }
-		file_menu.append(file_print)
+#		file_menu.append(file_print)
 
 		# File -> -----------
-		file_menu.append(Gtk::SeparatorMenuItem.new)
+#		file_menu.append(Gtk::SeparatorMenuItem.new)
 
 		# File -> Properties
-		file_properties = Gtk::ImageMenuItem.new(Gtk::Stock::PROPERTIES)
-		file_properties.signal_connect('activate') { current_view.properties }
-		file_menu.append(file_properties)
+		@file_properties = Gtk::ImageMenuItem.new(Gtk::Stock::PROPERTIES)
+		@file_properties.signal_connect('activate') { current_view.properties }
+		file_menu.append(@file_properties)
 
 		# File -> -----------
 		file_menu.append(Gtk::SeparatorMenuItem.new)
@@ -244,9 +246,9 @@ class Main < Gtk::Window
 		view.set_submenu(view_menu)
 
 		# View -> Previous Chapter
-		view_jump = Gtk::ImageMenuItem.new(Gtk::Stock::JUMP_TO)
-		view_jump.signal_connect('activate') { jump_to }
-		view_menu.append(view_jump)
+		@view_jump = Gtk::ImageMenuItem.new(Gtk::Stock::JUMP_TO)
+		@view_jump.signal_connect('activate') { current_view.jump_to }
+		view_menu.append(@view_jump)
 
 		# View -> -----------
 		view_menu.append(Gtk::SeparatorMenuItem.new)
@@ -571,37 +573,6 @@ class Main < Gtk::Window
 		raise 'Implement this method'
 	end
 	private :page_setup
-
-
-	# 
-	# Jump to
-	#
-	def jump_to
-		w = Gtk::Window.new
-		w.set_title(_('Jump to verse'))
-		w.border_width = 6
-		
-		vbox = Gtk::VBox.new(false, 6)
-		hbox = Gtk::HBox.new(false, 6)
-		entry = Gtk::Entry.new
-		jump = Gtk::Button.new(Gtk::Stock::JUMP_TO)
-		jump.flags = Gtk::Widget::CAN_DEFAULT
-		jump.signal_connect('clicked') do
-
-		end
-
-		vbox.pack_start(Gtk::Label.new(_('Type a bible reference below.')), false, false)
-		hbox.pack_start(entry, false, false)
-		hbox.pack_start(jump, false, false)
-		vbox.pack_start(hbox, false, false)
-		w.add(vbox)
-
-		w.modal = true
-		w.transient_for = self
-		w.default = jump
-		w.show_all
-	end
-	private :jump_to
 
 
 	#
