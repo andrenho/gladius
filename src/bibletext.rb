@@ -127,8 +127,13 @@ class BibleText < Gtk::ScrolledWindow
 		n_paragraphs = paragraphs.length.to_f
 		paragraphs.each do |paragraph|
 			
+			if search_terms == nil
+				f = 0.2
+			else
+				f = 0.1
+			end
 			if progress != nil
-				progress.fraction += 1.to_f / n_paragraphs * 0.1
+				progress.fraction += 1.to_f / n_paragraphs * f
 				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
 			end
 
@@ -195,8 +200,13 @@ class BibleText < Gtk::ScrolledWindow
 		n_parts = @parts.length
 		@parts.each do |vp|
 
+			if search_terms == nil
+				f = 0.8
+			else
+				f = 0.7
+			end
 			if progress != nil
-				progress.fraction += 1.to_f / n_parts * 0.7
+				progress.fraction += 1.to_f / n_parts * f
 				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
 			end
 

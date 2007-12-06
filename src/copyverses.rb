@@ -86,7 +86,18 @@ private
 	end
 
 	def update_sample
+		$main.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
+		window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH) if window != nil
+		Gtk.main_iteration
 		verses, ok = @bible.parse(@text.buffer.text)
+		$main.window.cursor = nil 
+		window.cursor = nil if window != nil
+		Gtk.main_iteration
+
+		if verses.length > 200
+			# TODO progress bar
+		end
+
 		@options.text.show_verses(verses)
 		if ok
 			@error.hide

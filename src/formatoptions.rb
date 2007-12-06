@@ -120,10 +120,11 @@ private
 		table.attach(@verses_color, 2, 3, 2, 3, 0, 0)
 		table.attach(@verses_ss, 3, 4, 2, 3, 0, 0)
 
-		table.attach(@strongs_chk, 0, 1, 3, 4, Gtk::FILL, 0)
-		table.attach(@strongs_font, 1, 2, 3, 4, Gtk::EXPAND|Gtk::FILL, 0)
-		table.attach(@strongs_color, 2, 3, 3, 4, 0, 0)
-		table.attach(@strongs_ss, 3, 4, 3, 4, 0, 0)
+# TODO
+#		table.attach(@strongs_chk, 0, 1, 3, 4, Gtk::FILL, 0)
+#		table.attach(@strongs_font, 1, 2, 3, 4, Gtk::EXPAND|Gtk::FILL, 0)
+#		table.attach(@strongs_color, 2, 3, 3, 4, 0, 0)
+#		table.attach(@strongs_ss, 3, 4, 3, 4, 0, 0)
 
 		frame.set_border_width(6)
 		frame.add(table)
