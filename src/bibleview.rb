@@ -353,7 +353,6 @@ class BibleView < View
 		$main.edit_paste.sensitive = false
 
 		$main.edit_find.sensitive = true
-		$main.edit_fn.sensitive = (@find_slot != "")
 		$main.edit_replace.sensitive = false
 
 		$main.edit_dt.signal_handler_block($main.edit_dt_signal) do 
@@ -372,4 +371,5 @@ class BibleView < View
 	end
 
 	def current_buffer; @bible_text.buffer; end
+	def current_textview; @bible_text.textview; end
 end

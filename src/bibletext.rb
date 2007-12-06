@@ -19,6 +19,7 @@ class BibleText < Gtk::ScrolledWindow
 
 	attr_reader :paragraphs
 	attr_reader :buffer
+	attr_reader :textview
 
 	#
 	# Initialize the Bible Text
@@ -229,6 +230,7 @@ class BibleText < Gtk::ScrolledWindow
 			end
 		end
 
+		@buffer.place_cursor(@buffer.start_iter)
 	end
 
 
