@@ -120,7 +120,6 @@ class Search < View
 		$main.edit_paste.sensitive = false
 
 		$main.edit_find.sensitive = true
-		$main.edit_fn.sensitive = (@find_slot != "")
 		$main.edit_replace.sensitive = false
 
 		$main.edit_dt.sensitive = false
@@ -136,6 +135,7 @@ class Search < View
 	end
 
 	def current_buffer; @text.buffer; end
+	def current_textview; @text.textview; end
 
 	#
 	# Copy verses screen

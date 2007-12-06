@@ -14,7 +14,7 @@ class Main < Gtk::Window
 	attr_reader :file_close
 	attr_reader :edit_undo, :edit_redo
 	attr_reader :edit_copy, :edit_cut, :edit_cv, :edit_paste
-	attr_reader :edit_find, :edit_fn, :edit_replace
+	attr_reader :edit_find, :edit_replace
 	attr_reader :edit_dt, :edit_dt_signal
 	attr_reader :view_jump
 	attr_reader :format_font, :format_paragraph
@@ -216,11 +216,6 @@ class Main < Gtk::Window
 		@edit_find = Gtk::ImageMenuItem.new(Gtk::Stock::FIND)
 		@edit_find.signal_connect('activate') { current_view.find }
 		edit_menu.append(@edit_find)
-
-		# Edit -> Find Next
-		@edit_fn = Gtk::MenuItem.new(_('Find next'))
-		@edit_fn.signal_connect('activate') { current_view.find_next }
-		edit_menu.append(@edit_fn)
 
 		# Edit -> Replace...
 		@edit_replace = Gtk::MenuItem.new(_('Replace'))
