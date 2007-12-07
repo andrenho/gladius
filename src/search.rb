@@ -105,19 +105,19 @@ class Search < View
 		$main.file_properties.sensitive = false
 		$main.file_close.sensitive = true
 		
-		$main.view_jump.sensitive = false
+		$main.tb_goto.sensitive = $main.view_jump.sensitive = false
 
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false
 
-		$main.edit_cut.sensitive = false
+		$main.tb_cut.sensitive = $main.edit_cut.sensitive = false
 		if @text.buffer.selection_bounds != nil
-			$main.edit_copy.sensitive = @text.buffer.selection_bounds[2]
+			$main.tb_copy.sensitive = $main.edit_copy.sensitive = @text.buffer.selection_bounds[2]
 		else
-			$main.edit_copy.sensitive = false
+			$main.tb_copy.sensitive = $main.edit_copy.sensitive = false
 		end
 		$main.edit_cv.sensitive = true
-		$main.edit_paste.sensitive = false
+		$main.tb_paste.sensitive = $main.edit_paste.sensitive = false
 
 		$main.edit_find.sensitive = true
 		$main.edit_replace.sensitive = false

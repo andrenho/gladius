@@ -162,8 +162,8 @@ class Bible
 				book = @db.get_first_value("
 					SELECT id
 					  FROM books
-					 WHERE abbr = '#{dec[0]}'
-					    OR name = '#{dec[0]}'").to_i
+					 WHERE abbr LIKE '#{dec[0]}'
+					    OR name LIKE '#{dec[0]}'").to_i # TODO use cache
 				chapter = dec[1].to_i
 				verse_list = []
 				if dec[2] != nil
@@ -177,6 +177,7 @@ class Bible
 					end
 				else
 					1.upto(self.n_verses(book, chapter)) { |i| verse_list << i }
+					ok = false if verse_list.length == 0
 				end
 				verses = []
 				verse_list.each do |verse|
@@ -192,6 +193,9 @@ class Bible
 		list.each do |paragraph|
 			paragraph.each do |verse|
 				if verse == [] or verse[0] == 0
+					paragraph.delete verse
+					ok = false
+				elsif @db.get_first_value("SELECT * FROM bible WHERE book=#{verse[0]} AND chapter=#{verse[1]} AND verse=#{verse[2]}").to_i == 0
 					paragraph.delete verse
 					ok = false
 				end
