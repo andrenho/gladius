@@ -20,11 +20,18 @@ class Main < Gtk::Window
 	attr_reader :format_font, :format_paragraph
 	attr_reader :format_bold, :format_italic, :format_underline
 
+	attr_reader :tb_copy, :tb_cut, :tb_paste, :tb_goto
+
 	# 
 	# Initialize main screen
 	#
 	def initialize
 		super
+
+		Gtk::Window.default_icon_list = [
+			Gdk::Pixbuf.new("#{IMG}/stock_book_yellow.png"),
+			Gdk::Pixbuf.new("#{IMG}/stock_book_yellow-16.png")
+		]
 
 		@current_book = @current_chapter = @current_verse = 1
 		$main = self
@@ -37,7 +44,6 @@ class Main < Gtk::Window
 		@paned.position = 150
 		set_title(_('Gladius %s', BB_VERSION))
 		set_default_size(600, 400)
-		set_icon("#{IMG}/stock_book_yellow-16.png")
 
 		@vbox = Gtk::VBox.new
 		@vbox.pack_end(@paned, true, true, 0)
@@ -45,7 +51,7 @@ class Main < Gtk::Window
 
 		@menubar = Gtk::MenuBar.new
 		@toolbar = Gtk::Toolbar.new
-		@toolbar.toolbar_style = Gtk::Toolbar::ICONS
+		@toolbar.toolbar_style = Gtk::Toolbar::BOTH_HORIZ
 
 		@views = []
 		bibleview = add_bibleview($default_bible)
@@ -54,7 +60,7 @@ class Main < Gtk::Window
 		@vbox.pack_start(@menubar, false, false, 0)
 		create_toolbar
 		@toolbar.show_all
-#		@vbox.pack_start(@toolbar, false, false, 0)
+		@vbox.pack_start(@toolbar, false, false, 0)
 
 		signal_connect('destroy') do 
 			Gtk.main_quit
@@ -67,6 +73,8 @@ class Main < Gtk::Window
 
 		select_verse(1, 1, 1)
 		bibleview.refit_menus
+
+		show_initial_message if $language != nil and $language != 'en_US'
 	end
 
 
@@ -74,6 +82,10 @@ class Main < Gtk::Window
 	# Create menu for the main screen
 	#
 	def create_menu
+
+		@ac = Gtk::AccelGroup.new
+		add_accel_group(@ac)
+
 		# File menu
 		file_menu = Gtk::Menu.new
 		file = Gtk::MenuItem.new(_('_File'))
@@ -91,7 +103,8 @@ class Main < Gtk::Window
 		file_new_menu.append(file_new_study)
 
 		# File -> Open
-		file_open = Gtk::ImageMenuItem.new(Gtk::Stock::OPEN)
+		file_open = Gtk::ImageMenuItem.new(_('Install from disk'))
+		file_open.image = Gtk::Image.new(Gtk::Stock::OPEN, Gtk::IconSize::MENU)
 		file_open_menu = Gtk::Menu.new
 		file_open.set_submenu(file_open_menu)
 		file_menu.append(file_open)
@@ -102,16 +115,10 @@ class Main < Gtk::Window
 		file_open_menu.append(file_open_bible)
 
 		# File -> Download
-		file_download = Gtk::ImageMenuItem.new(_('Download'))
+		file_download = Gtk::ImageMenuItem.new(_('Download...'))
 		file_download.image = Gtk::Image.new(Gtk::Stock::NETWORK, Gtk::IconSize::MENU)
-		file_download_menu = Gtk::Menu.new
-		file_download.set_submenu(file_download_menu)
+		file_download.signal_connect('activate') { Download.new.show }
 		file_menu.append(file_download)
-
-		# File -> Download -> Bible
-		file_download_bible = Gtk::MenuItem.new(_('Bible translation...'))
-		file_download_bible.signal_connect('activate') { Download.new.show }
-		file_download_menu.append(file_download_bible)
 
 		# File -> -----------
 		file_menu.append(Gtk::SeparatorMenuItem.new)
@@ -119,6 +126,7 @@ class Main < Gtk::Window
 		# File -> Save
 		@file_save = Gtk::ImageMenuItem.new(Gtk::Stock::SAVE)
 		@file_save.signal_connect('activate') { current_view.save }
+		@file_save.add_accelerator('activate', @ac, Gdk::Keyval::GDK_S, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		file_menu.append(@file_save)
 
 		# File -> Save As
@@ -148,6 +156,7 @@ class Main < Gtk::Window
 		# File -> Print...
 		file_print = Gtk::ImageMenuItem.new(Gtk::Stock::PRINT)
 		file_print.signal_connect('activate') { current_view.print }
+		file_print.add_accelerator('activate', @ac, Gdk::Keyval::GDK_P, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 #		file_menu.append(file_print)
 
 		# File -> -----------
@@ -156,6 +165,7 @@ class Main < Gtk::Window
 		# File -> Properties
 		@file_properties = Gtk::ImageMenuItem.new(Gtk::Stock::PROPERTIES)
 		@file_properties.signal_connect('activate') { current_view.properties }
+		@file_properties.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Return, Gdk::Window::MOD1_MASK, Gtk::ACCEL_VISIBLE)
 		file_menu.append(@file_properties)
 
 		# File -> -----------
@@ -164,11 +174,13 @@ class Main < Gtk::Window
 		# File -> Close
 		@file_close = Gtk::ImageMenuItem.new(Gtk::Stock::CLOSE)
 		@file_close.signal_connect('activate') { current_view.close }
+		@file_close.add_accelerator('activate', @ac, Gdk::Keyval::GDK_W, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		file_menu.append(@file_close)
 
 		# File -> Quit
 		file_exit = Gtk::ImageMenuItem.new(Gtk::Stock::QUIT)
 		file_exit.signal_connect('activate') { Gtk.main_quit }
+		file_exit.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Q, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		file_menu.append(file_exit)
 
 		# Edit
@@ -179,11 +191,13 @@ class Main < Gtk::Window
 		# Edit -> Undo
 		@edit_undo = Gtk::ImageMenuItem.new(Gtk::Stock::UNDO)
 		@edit_undo.signal_connect('activate') { current_view.undo }
+		@edit_undo.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Z, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_undo)
 
 		# Edit -> Redo
 		@edit_redo = Gtk::ImageMenuItem.new(Gtk::Stock::REDO)
 		@edit_redo.signal_connect('activate') { current_view.redo }
+		@edit_redo.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Z, Gdk::Window::CONTROL_MASK|Gdk::Window::SHIFT_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_redo)
 
 		# Edit -> -----------
@@ -192,21 +206,25 @@ class Main < Gtk::Window
 		# Edit -> Cut
 		@edit_cut = Gtk::ImageMenuItem.new(Gtk::Stock::CUT)
 		@edit_cut.signal_connect('activate') { current_view.cut }
+		@edit_cut.add_accelerator('activate', @ac, Gdk::Keyval::GDK_X, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_cut)
 
 		# Edit -> Copy
 		@edit_copy = Gtk::ImageMenuItem.new(Gtk::Stock::COPY)
 		@edit_copy.signal_connect('activate') { current_view.copy }
+		@edit_copy.add_accelerator('activate', @ac, Gdk::Keyval::GDK_C, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_copy)
 
 		# Edit -> Copy Verses
 		@edit_cv = Gtk::MenuItem.new(_('Copy verses...'))
 		@edit_cv.signal_connect('activate') { current_view.copy_verses }
+		@edit_cv.add_accelerator('activate', @ac, Gdk::Keyval::GDK_C, Gdk::Window::CONTROL_MASK|Gdk::Window::SHIFT_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_cv)
 
 		# Edit -> Paste
 		@edit_paste = Gtk::ImageMenuItem.new(Gtk::Stock::PASTE)
 		@edit_paste.signal_connect('activate') { current_view.paste }
+		@edit_paste.add_accelerator('activate', @ac, Gdk::Keyval::GDK_V, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_paste)
 
 		# Edit -> -----------
@@ -215,11 +233,15 @@ class Main < Gtk::Window
 		# Edit -> Find...
 		@edit_find = Gtk::ImageMenuItem.new(Gtk::Stock::FIND)
 		@edit_find.signal_connect('activate') { current_view.find }
+		@edit_find.add_accelerator('activate', @ac, Gdk::Keyval::GDK_F, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_find)
+
+		# TODO search bible
 
 		# Edit -> Replace...
 		@edit_replace = Gtk::MenuItem.new(_('Replace'))
 		@edit_replace.signal_connect('activate') { current_view.replace }
+		@edit_replace.add_accelerator('activate', @ac, Gdk::Keyval::GDK_H, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		edit_menu.append(@edit_replace)
 
 		# Edit -> -----------
@@ -240,9 +262,10 @@ class Main < Gtk::Window
 		view = Gtk::MenuItem.new(_('_View'))
 		view.set_submenu(view_menu)
 
-		# View -> Previous Chapter
+		# View -> Go to
 		@view_jump = Gtk::ImageMenuItem.new(Gtk::Stock::JUMP_TO)
 		@view_jump.signal_connect('activate') { current_view.jump_to }
+		@view_jump.add_accelerator('activate', @ac, Gdk::Keyval::GDK_L, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		view_menu.append(@view_jump)
 
 		# View -> -----------
@@ -251,11 +274,13 @@ class Main < Gtk::Window
 		# View -> Previous Chapter
 		view_pc = Gtk::ImageMenuItem.new(Gtk::Stock::GO_BACK)
 		view_pc.signal_connect('activate') { previous_chapter }
+		view_pc.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Left, Gdk::Window::MOD1_MASK, Gtk::ACCEL_VISIBLE)
 		view_menu.append(view_pc)
 
 		# View -> Next Chapter
 		view_nc = Gtk::ImageMenuItem.new(Gtk::Stock::GO_FORWARD)
 		view_nc.signal_connect('activate') { next_chapter }
+		view_nc.add_accelerator('activate', @ac, Gdk::Keyval::GDK_Right, Gdk::Window::MOD1_MASK, Gtk::ACCEL_VISIBLE)
 		view_menu.append(view_nc)
 
 		# TODO - view toolbar
@@ -297,16 +322,19 @@ class Main < Gtk::Window
 		# Format -> Bold
 		@format_bold = Gtk::ImageMenuItem.new(Gtk::Stock::BOLD)
 		@format_bold.signal_connect('activate') { current_view.bold }
+		@format_bold.add_accelerator('activate', @ac, Gdk::Keyval::GDK_B, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		format_menu.append(@format_bold)
 
 		# Format -> Italic
 		@format_italic = Gtk::ImageMenuItem.new(Gtk::Stock::ITALIC)
 		@format_italic.signal_connect('activate') { current_view.italic }
+		@format_italic.add_accelerator('activate', @ac, Gdk::Keyval::GDK_I, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		format_menu.append(@format_italic)
 
 		# Format -> Underline
 		@format_underline = Gtk::ImageMenuItem.new(Gtk::Stock::UNDERLINE)
 		@format_underline.signal_connect('activate') { current_view.underline }
+		@format_underline.add_accelerator('activate', @ac, Gdk::Keyval::GDK_U, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		format_menu.append(@format_underline)
 
 		# Bookmarks
@@ -346,11 +374,13 @@ class Main < Gtk::Window
 		bookmark_add = Gtk::ImageMenuItem.new(_('Add bookmark...'))
 		bookmark_add.image = Gtk::Image.new(Gtk::Stock::ADD, Gtk::IconSize::MENU)
 		bookmark_add.signal_connect('activate') { add_bookmark }
+		bookmark_add.add_accelerator('activate', @ac, Gdk::Keyval::GDK_D, Gdk::Window::CONTROL_MASK, Gtk::ACCEL_VISIBLE)
 		@bookmark_menu.append(bookmark_add)
 
 		# Bookmarks -> Edit
 		bookmark_edit = Gtk::MenuItem.new(_('Edit bookmarks...'))
 		bookmark_edit.signal_connect('activate') { edit_bookmarks }
+		bookmark_edit.add_accelerator('activate', @ac, Gdk::Keyval::GDK_D, Gdk::Window::CONTROL_MASK|Gdk::Window::SHIFT_MASK, Gtk::ACCEL_VISIBLE)
 		bookmark_edit.sensitive = (Bookmarks.list.length != 0)
 		@bookmark_menu.append(bookmark_edit)
 
@@ -374,16 +404,53 @@ class Main < Gtk::Window
 	# Create a toolbar for the main window
 	# 
 	def create_toolbar
-		bibles = Gtk::Label.new(_('Bibles'))
-		bibles.xpad = 6
-		@toolbar.append(bibles)
+		@tb_goto = Gtk::ToolButton.new(Gtk::Stock::JUMP_TO)
+		@tb_goto.important = true
+		@tb_goto.signal_connect('clicked') { current_view.jump_to }
+		@tb_goto.set_tooltip($tip, _('Go to a bible text'), '')
+		@toolbar.add(@tb_goto)
 
-		@toolbar.append(Gtk::Stock::OPEN, _('Load bible from file')) { add_new_bible }
-		@toolbar.append(Gtk::Stock::NETWORK, _('Download bible from the internet')) { Download.new.show }
-		# TODO implement
-		@toolbar.append(Gtk::Stock::JUSTIFY_FILL, _('Open a new bible')) {  } 
+		tb_previous = Gtk::ToolButton.new(Gtk::Stock::GO_BACK)
+		tb_previous.signal_connect('clicked') { previous_chapter }
+		tb_previous.set_tooltip($tip, _('Go to the previous chapter'), '')
+		@toolbar.add(tb_previous)
 
-		@toolbar.append_space
+		tb_next = Gtk::ToolButton.new(Gtk::Stock::GO_FORWARD)
+		tb_next.signal_connect('clicked') { next_chapter }
+		tb_next.set_tooltip($tip, _('Go to the next chapter'), '')
+		@toolbar.add(tb_next)
+
+		@toolbar.add(Gtk::SeparatorToolItem.new)
+
+		@tb_copy = Gtk::ToolButton.new(Gtk::Stock::COPY)
+		@tb_copy.signal_connect('clicked') { current_view.copy }
+		@tb_copy.set_tooltip($tip, _('Copy'), '')
+		@toolbar.add(@tb_copy)
+
+		@tb_cut = Gtk::ToolButton.new(Gtk::Stock::CUT)
+		@tb_cut.signal_connect('clicked') { current_view.cut }
+		@tb_cut.set_tooltip($tip, _('Cut'), '')
+		@toolbar.add(@tb_cut)
+
+		@tb_paste = Gtk::ToolButton.new(Gtk::Stock::PASTE)
+		@tb_paste.signal_connect('clicked') { current_view.paste }
+		@tb_paste.set_tooltip($tip, _('Paste'), '')
+		@toolbar.add(@tb_paste)
+
+		@toolbar.add(Gtk::SeparatorToolItem.new)
+
+		tb_download = Gtk::ToolButton.new(Gtk::Stock::NETWORK)
+		tb_download.signal_connect('clicked') { Download.new.show }
+		tb_download.set_tooltip($tip, _('Download a module from the internet'), '')
+		@toolbar.add(tb_download)
+
+		# available bibles
+		image = Gtk::Image.new("#{IMG}/stock_book_yellow-16.png")
+		bibles_menu = Gtk::MenuToolButton.new(image, 'Bibles')
+		bibles_menu.set_tooltip($tip, _('Open a bible installed in this computer'), '')
+		@toolbar.add(bibles_menu)
+		bibles_menu.menu = @view_bibles_menu
+		# bibles_menu.signal_connect('clicked') { |w| bibles_menu.signal_emit('show_menu') }
 	end
 	private :create_toolbar
 
@@ -605,5 +672,21 @@ class Main < Gtk::Window
 		})
 	end
 	private :about
+
+
+	# 
+	# Show initial message
+	#
+	def show_initial_message
+		return if $config['show_first_message']
+		
+		w = Gtk::Dialog.new(
+			_('Welcome!'),
+			self,
+			Gtk::Dialog::MODAL,
+			[Gtk::Stock::OK, Gtk::Dialog::RESPONSE_OK],
+			[_('Download now...'), Gtk::Dialog::RESPONSE_HELP]
+		)
+	end
 
 end

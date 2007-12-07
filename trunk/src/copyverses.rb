@@ -72,8 +72,8 @@ private
 		button_box.pack_start(cancel)
 		button_box.pack_start(copy)
 
-		hbox.pack_start(frame, true, true)
-		hbox.pack_start(@options, false, false)
+		hbox.pack_start(frame, false, false)
+		hbox.pack_start(@options, true, true)
 
 		vbox.pack_start(hbox, true, true)
 		vbox.pack_start(button_box, false, false)
@@ -88,11 +88,16 @@ private
 	def update_sample
 		$main.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
 		window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH) if window != nil
-		Gtk.main_iteration
+#		while Gtk.events_pending?
+#			Gtk.main_iteration
+#		end
 		verses, ok = @bible.parse(@text.buffer.text)
 		$main.window.cursor = nil 
 		window.cursor = nil if window != nil
-		Gtk.main_iteration
+
+#		while Gtk.events_pending?
+#			Gtk.main_iteration
+#		end
 
 		if verses.length > 200
 			# TODO progress bar

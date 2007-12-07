@@ -19,25 +19,6 @@ class BibleView < View
 		# MENU BUTTONS
 		# 
 		
-		# Previous
-		previous_button = Gtk::Button.new
-		previous_button.add(Gtk::Image.new(Gtk::Stock::GO_BACK, Gtk::IconSize::MENU))
-		previous_button.relief = Gtk::RELIEF_NONE
-		$tip.set_tip(previous_button, _('Previous chapter'), '')
-		@hbox.pack_start(previous_button, false, false)
-		previous_button.signal_connect('clicked') { $main.previous_chapter }
-
-		# Next
-		next_button = Gtk::Button.new
-		next_button.add(Gtk::Image.new(Gtk::Stock::GO_FORWARD, Gtk::IconSize::MENU))
-		next_button.relief = Gtk::RELIEF_NONE
-		$tip.set_tip(next_button, _('Next chapter'), '')
-		@hbox.pack_start(next_button, false, false)
-		next_button.signal_connect('clicked') { $main.next_chapter }
-
-		# ----------------
-		@hbox.pack_start(Gtk::VSeparator.new, false, false)
-
 		# Copy verses
 		cv_button = Gtk::Button.new
 		cv_button.add(Gtk::Image.new(Gtk::Stock::COPY, Gtk::IconSize::MENU))
@@ -200,9 +181,9 @@ class BibleView < View
 		search_entry.signal_connect('activate') do 
 			text = search_entry.text
 			if text != ''
-				m = Search::EXACT     if exact.active?
-				m = Search::ALL_WORDS if all_words.active?
-				m = Search::ANY_WORDS if any_words.active?
+				m = Search::EXACT     	if exact.active?
+				m = Search::ALL_WORDS 	if all_words.active?
+				m = Search::ANY_WORDS 	if any_words.active?
 				r = Search::ALL         if all.active?
 				r = Search::PENTATEUCH  if pentateuch.active?
 				r = Search::HISTORICALS if ot_historicals.active?
@@ -270,6 +251,7 @@ class BibleView < View
 		jump.flags = Gtk::Widget::CAN_DEFAULT
 		jump.signal_connect('clicked') do
 			paragraphs, ok = @bible.parse(entry.text)
+			ok = false if paragraphs == []
 			if ok
 				verses = paragraphs[0]
 				$main.select_verse(verses[0][0], verses[0][1], verses[0][2])
@@ -338,19 +320,19 @@ class BibleView < View
 			@close_button.sensitive = false
 		end
 
-		$main.view_jump.sensitive = true
+		$main.tb_goto.sensitive = $main.view_jump.sensitive = true
 
 		$main.edit_undo.sensitive = false
 		$main.edit_redo.sensitive = false
 
-		$main.edit_cut.sensitive = false
+		$main.tb_cut.sensitive = $main.edit_cut.sensitive = false
 		if @bible_text.buffer.selection_bounds != nil
-			$main.edit_copy.sensitive = true
+			$main.tb_copy.sensitive = $main.edit_copy.sensitive = @bible_text.buffer.selection_bounds[2]
 		else
-			$main.edit_copy.sensitive = false
+			$main.tb_copy.sensitive = $main.edit_copy.sensitive = false
 		end
 		$main.edit_cv.sensitive = true
-		$main.edit_paste.sensitive = false
+		$main.tb_paste.sensitive = $main.edit_paste.sensitive = false
 
 		$main.edit_find.sensitive = true
 		$main.edit_replace.sensitive = false

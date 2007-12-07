@@ -45,6 +45,7 @@ class Object
 		else
 			language = language.downcase
 		end
+		$language = language
 		begin
 			if I18N == nil
 				f = YAML::load(File.open("i18n/#{language}.yaml"))
