@@ -47,7 +47,7 @@ class Download < Gtk::Window
 		@download_button.show
 		@download_button.signal_connect('clicked') do |w|
 			Thread.abort_on_exception = true
-			@dl_thread = Thread.new { download}
+			@dl_thread = Thread.new { download }
 		end
 		@vbox.pack_start(@af, false, false)
 
@@ -55,8 +55,17 @@ class Download < Gtk::Window
 		
 		add(@vbox)
 
+		@downloading_frame.show_all
+		self.show
+		self.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
+
+		Gtk.main_iteration while Gtk.events_pending?
+
 		Thread.abort_on_exception = true
-		Thread.new { get_modules }
+		Thread.new do 
+			get_modules
+			self.window.cursor = nil
+		end
 	end
 
 	def build_download_tree
@@ -99,13 +108,18 @@ class Download < Gtk::Window
 	def get_modules
 		yaml = ''
 		begin
-			Net::HTTP.start('gladius.googlecode.com') do |http|
+#			Timeout::timeout(5) do 
+				http = Net::HTTP.new('gladius.googlecode.com')
+				http.open_timeout = 5
+				http.read_timeout = 5
+				http.start
 				resp = http.get('/svn/trunk/data/modules.yaml')
 				yaml = resp.body
-			end
-			records = YAML::load(yaml)
-		rescue
-			puts 'No connection'
+				records = YAML::load(yaml)
+#			end
+		rescue Timeout::Error
+			Util.warning(_('Sorry! An internet connection could not be established.'))
+			self.destroy
 		else
 			@downloading_frame.hide
 			@scroll_options.show

@@ -49,17 +49,19 @@ private
 		@error.markup = '<span foreground="red" weight="bold">' + _('There was a error parsing one of the verses supplied.') + '</span>'
 		@error.wrap = true
 		@error.width_request = 120
-		apply = Gtk::Button.new(Gtk::Stock::APPLY)
-		apply.signal_connect('clicked') do
+		@apply = Gtk::Button.new(Gtk::Stock::APPLY)
+		@apply.signal_connect('clicked') do
 			update_sample
 		end
+		@progress = Gtk::ProgressBar.new
 
 		vbox_frame = Gtk::VBox.new(false, 6)
 		vbox_frame.border_width = 6
 		vbox_frame.pack_start(instruction, false, false)
 		vbox_frame.pack_start(scroll, true, true)
 		vbox_frame.pack_start(@error, false, false)
-		vbox_frame.pack_start(apply, false, false)
+		vbox_frame.pack_start(@apply, false, false)
+		vbox_frame.pack_start(@progress, false, false)
 		frame.add(vbox_frame)
 
 		button_box = Gtk::HButtonBox.new
@@ -79,31 +81,37 @@ private
 		vbox.pack_start(button_box, false, false)
 		add(vbox)
 
-		update_sample
-
 		show_all
 		@error.hide
+		@progress.hide
+
+		update_sample
 	end
 
 	def update_sample
-		$main.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
-		window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH) if window != nil
-#		while Gtk.events_pending?
-#			Gtk.main_iteration
-#		end
+		#$main.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
+		#window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH) if window != nil
+		#$main.window.cursor = nil 
+		#window.cursor = nil if window != nil
+		
 		verses, ok = @bible.parse(@text.buffer.text)
-		$main.window.cursor = nil 
-		window.cursor = nil if window != nil
-
-#		while Gtk.events_pending?
-#			Gtk.main_iteration
-#		end
 
 		if verses.length > 200
-			# TODO progress bar
+			Thread.new do
+				@apply.hide
+				@progress.show
+				@progress.fraction = 0
+				window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
+				Thread.pass
+				@options.text.show_verses(verses, nil, nil, @progress)
+				@progress.hide
+				@apply.show
+				window.cursor = nil
+			end
+		else
+			@options.text.show_verses(verses)
 		end
 
-		@options.text.show_verses(verses)
 		if ok
 			@error.hide
 		else

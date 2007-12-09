@@ -121,6 +121,8 @@ class BibleText < Gtk::ScrolledWindow
 		@paragraphs = paragraphs
 		@header = header
 
+		@textview.buffer = Gtk::TextBuffer.new
+
 		# create verses
 		@parts = []
 		i = 0
@@ -135,6 +137,7 @@ class BibleText < Gtk::ScrolledWindow
 			if progress != nil
 				progress.fraction += 1.to_f / n_paragraphs * f
 				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+				Thread.pass
 			end
 
 			next_letter_bold = false
@@ -208,6 +211,7 @@ class BibleText < Gtk::ScrolledWindow
 			if progress != nil
 				progress.fraction += 1.to_f / n_parts * f
 				progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+				Thread.pass
 			end
 
 			vp.begin = iter.offset
@@ -224,6 +228,8 @@ class BibleText < Gtk::ScrolledWindow
 			vp.end = iter.offset
 		end
 
+		@textview.buffer = @buffer
+
 		# Search terms
 		if search_terms != nil
 			n_paragraphs /= search_terms.split.length
@@ -233,8 +239,11 @@ class BibleText < Gtk::ScrolledWindow
 				while (i = i[1].forward_search(term, Gtk::TextIter::SEARCH_TEXT_ONLY, nil)) != nil
 					@buffer.apply_tag(@found_tag, i[0], i[1])
 					if progress != nil
-						progress.fraction += 1.to_f / n_paragraphs.to_f * 0.2
-						progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+						if (progress.fraction + (1.to_f / n_paragraphs.to_f * 0.2)) < 1
+							progress.fraction += 1.to_f / n_paragraphs.to_f * 0.2
+							progress.text = (progress.fraction * 100).to_i.to_s + ' %'
+						end
+						Thread.pass
 					end
 				end
 			end
