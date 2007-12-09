@@ -38,6 +38,7 @@ class Object
 			language = ENV["LC_ALL"] if language == nil
 			language = ENV["LC_MESSAGES"] if language == nil
 			language = ENV["LANG"] if language == nil
+			language = language.split('.')[0] if language != nil
 		end
 		if language == nil
 			# puts "Warning: #{@l[0]['language']} language file could not be loaded."
@@ -54,7 +55,7 @@ class Object
 			end
 #			puts "#{language} language file loaded."
 		rescue SystemCallError
-#			$stderr.puts "Warning: #{language} language file could not be loaded."
+#			$stderr.puts "Warning: #{language} language file could not be loaded."			
 			return
 		end
 		$l = {}

@@ -54,7 +54,7 @@ class Format
 
 	def paragraph_code=(new)
 		@paragraph_code = new
-		@parsed_paragraph_code = parse(new)
+		@parsed_paragraph_code = parse(new) if new != nil
 	end
 
 
@@ -92,7 +92,7 @@ class Format
 		f.show_strongs = true if f.show_strongs == nil
 
 		f.paragraph_code = $config[abbr, 'paragraph_code']
-		f.paragraph_code = Format::OLD_BIBLE if f.paragraph_code == nil
+		f.paragraph_code = FormatOptions::OLD_BIBLE if f.paragraph_code == nil
 
 		return f
 	end

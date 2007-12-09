@@ -74,7 +74,6 @@ class Search < View
 		@format = bibleview.format.clone
 		@format.paragraph_code = "%T [%A %C:%V]\\n"
 		@format.verses_ss = false
-
 	end
 
 	def show_results(rs)
@@ -140,14 +139,14 @@ class Search < View
 	#
 	# Copy verses screen
 	def copy_verses
-		ok = false
-		if @n_results > 200
-			if Util.question(_('This search has many results, and it may take a few seconds to open the copy window. Do you want to continue?')) == Gtk::Dialog::RESPONSE_YES
-				ok = true
-			end
-		else
+#		ok = false
+#		if @n_results > 200
+#			if Util.question(_('This search has many results, and it may take a few seconds to open the copy window. Do you want to continue?')) == Gtk::Dialog::RESPONSE_YES
+#				ok = true
+#			end
+#		else
 			ok = true
-		end
+#		end
 		CopyVerses.new(@bible, @bible.unparse(@verses)) if ok
 	end
 

@@ -267,6 +267,10 @@ class BibleView < View
 		vbox.pack_start(hbox, false, false)
 		w.add(vbox)
 
+		w.signal_connect('key-press-event') do |w, e|
+			w.destroy if e.keyval == Gdk::Keyval::GDK_Escape
+		end
+
 		w.modal = true
 		w.transient_for = self
 		w.resizable = false

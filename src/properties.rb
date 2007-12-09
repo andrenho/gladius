@@ -7,7 +7,7 @@ class Properties < Gtk::Window
 		set_modal(true)
 		set_transient_for($main)
 		set_resizable(false)
-		set_size_request(300, 400)
+		set_size_request(400, 500)
 
 		table = Gtk::Table.new(pairs.length, 2)
 		table.row_spacings = table.column_spacings = 6

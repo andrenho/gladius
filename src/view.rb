@@ -83,6 +83,10 @@ class View < Gtk::HPaned
 		table.attach(frame, 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK)
 		table.attach(button_box, 2, 3, 0, 2)
 
+		w.signal_connect('key-press-event') do |w, e|
+			w.destroy if e.keyval == Gdk::Keyval::GDK_Escape
+		end
+
 		w.add(table)
 		w.default = find
 		w.show_all

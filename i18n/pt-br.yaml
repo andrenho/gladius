@@ -1,225 +1,377 @@
 --- 
-- 
-  language: Português Brasileiro
+- language: "Português Brasileiro"
   code: pt-br
   email-translator: andre.nho@gmail.com
-  translator: André Wagner
-- 
-  - View
+  translator: "André Wagner"
+- - Copy verses
+  - Copiar versículos
+- - Search
+  - Buscar
+- - Type the search term here
+  - Digite o termo de procura aqui
+- - Exact phrase
+  - Frase exata
+- - All words
+  - Todas as palavras
+- - Any words
+  - Qualquer uma das palavras
+- - How the search matches the string typed by the user
+  - Forma de busca
+- - Partial match
+  - Busca palavra parcial
+- - All
+  - Todos
+- - Pentateuch
+  - Pentateuco
+- - OT Historicals
+  - AT Históricos
+- - OT Wisdom
+  - AT Sabedoria
+- - Prophets
+  - Profetas
+- - Gospels
+  - Evangelhos
+- - Epistols
+  - Epístolas
+- - Range of the search
+  - Limite da busca
+- - Open search in a new window
+  - Abrir procura em uma nova janela
+- - Jump to verse
+  - Ir para versículo
+- - Invalid reference.
+  - Referência inválida.
+- - Type a bible reference below.
+  - Digite uma referência bíblica abaixo.
+- - "%s is now your default bible."
+  - "%s agora é sua bíblia padrão."
+- - Name
+  - Nome
+- - Year
+  - Ano
+- - Comment
+  - Comentário
+- - Search Results
+  - Resultados da Busca
+- - Searching...
+  - Procurando...
+- - Preparing...
+  - Preparando..
+- - This search has many results, and it may take a few seconds to open the copy window. Do you want to continue?
+  - Esta busca trouxe muitos resultados, e pode levar alguns segundos para abrir a janela de cópia. Deseja continuar?
+- - Bible preferences
+  - Preferências da Bíblia
+- - Copy Verses
+  - Copiar Versículos
+- - Type below the references of the verses you want to copy, and then click on Apply.
+  - Digite abaixo as referências dos versículos que você deseja copiar, e clique em Aplicar.
+- - Verses to copy
+  - Versículos para copiar
+- - There was a error parsing one of the verses supplied.
+  - Houve um erro ao interpretar os versículos digitados.
+- - The text was copied to the clipboard.
+  - O texto foi copiado para a área de transferência.
+- - Fonts
+  - Fontes
+- - Sample
+  - Exemplo
+- - Font
+  - Fonte
+- - Paragraph
+  - Parágrafo
+- - Biblical Text Font
+  - Fonte do Texto Bíblico
+- - Chapter Header
+  - Cabeçalho do Capíutlo
+- - Biblical References Font
+  - Fonte das Referências Bíblicas
+- - Strongs Numbers
+  - Números Strong
+- - Old Bible
+  - Bíblia Antiga
+- - Individual verses
+  - Versículos Individuais
+- - Paragraphs
+  - Parágrafos
+- - Paragraphs (no verses)
+  - Parágrafos (sem versículos)
+- - Advanced
+  - Avançado
+- - Simple
+  - Simples
+- - Name of the book (e.g. "Genesis")
+  - Nome do livro (p.ex. "Gênesis")
+- - Abbreviation of the book (e.g. "Gen")
+  - Abreviatura do livro (p.ex. "Gn")
+- - Number of the chapter
+  - Número do capítulo
+- - Number of the verse
+  - Número do versículo
+- - Text of the verse
+  - Texto do versículo
+- - In the next verse, the first letter will be bold
+  - No próximo versículo, a 1ª letra fica em negrito
+- - New line
+  - Nova linha
+- - The code between brackets is only executed
+  - O código entre chaves é executado apenas
+- - at the beginning or the end of paragraphs
+  - no início ou no fim dos parágrafos
+- - Text code
+  - Código
+- - Properties
+  - Propriedades
+- - Close this frame
+  - Fechar esta janela
+- - Find
+  - Procurar
+- - _Below
+  - A_baixo
+- - _Above
+  - _Acima
+- - Direction
+  - Direção
+- - No results were found.
+  - Nenhum resultado foi encontrado.
+- - Download from the internet
+  - Baixar da internet
+- - Downloading data from the internet...
+  - Baixando dados da internet
+- - Download
+  - Baixar
+- - Lang
+  - Idioma
+- - Module
+  - Módulo
+- - Version
+  - Versão
+- - Bible Translations
+  - Traduções Bíblicas
+- - Cancelled
+  - Cancelado
+- - Unpacking
+  - Descompactando
+- - Done
+  - Feito
+- - All downloads completed successfully. You can now read any of these modules on the View menu.
+  - Todos os download foram completados com sucesso. Agora você pode ler qualquer um destes módulos no menu Visualizar.
+- - Gladius %s
+  - 
+- - There can only be up to 10 bookmarks. If you want to add this bookmark, please delete some to make room.
+  - Podem haver até 10 marcardores. Se você deseja adicionar este marcador, por favor exclua algum marcador existente.
+- - Edit bookmarks
+  - Editar marcadores
+- - Verse list
+  - Lista de versículos
+- - _File
+  - _Arquivo
+- - Topic Study
+  - Estudo Tópico
+- - (Not Implemented)
+  - (Não Implementado)
+- - Install from disk
+  - Instalar do disco
+- - Bible translation...
+  - Tradução Bíblica...
+- - Download...
+  - Baixar...
+- - Page Setup...
+  - Configurar Página...
+- - _Edit
+  - _Editar
+- - Copy verses...
+  - Copiar versículos...
+- - Replace
+  - Substituir
+- - Default Translation
+  - Tradução Padrão
+- - _View
+  - _Visualizar
+- - _Bible Translations
+  - Traduções _Bíblicas
+- - F_ormat
+  - _Formatar
+- - _Font...
+  - _Fonte...
+- - _Paragraph...
+  - _Parágrafo...
+- - _Bookmarks
+  - _Marcadores
+- - _Help
+  - _Ajuda
+- - Add bookmark...
+  - Adicionar marcador...
+- - Edit bookmarks...
+  - Editar marcadores...
+- - Go to a bible text
+  - Ir para um texto bíblico
+- - Go to the previous chapter
+  - Ir para o capítulo anterior
+- - Go to the next chapter
+  - Ir para o próximo capítulo
+- - Copy
+  - Copiar
+- - Cut
+  - Cortar
+- - Paste
+  - Colar
+- - Download a module from the internet
+  - Baixar um módulo da internet
+- - Open a bible installed in this computer
+  - Abrir uma bíblia instalada neste computador
+- - This Bible has been installed. You can this Bible anytime by choosing View -> Bible translations -> %s
+  - Esta Bíblia foi instalada. Você pode visualizar esta Bíblia em qualquer momento selecionando Visualizar -> Traduções Bíblicas -> %s
+- - GNU General Public License
+  - Licença Geral Pública GNU (GPL)
+- - See http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+  - Veja em http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+- - Welcome!
+  - Bem vindo!
+- - Download now...
+  - Baixar agora...
+- - View
   - Visualizar
-- 
-  - Bible translations
-  - Traduções da Bíblia
-- 
-  - Install...
+- - Bible translations
+  - "Tradu\xC3\xA7\xC3\xB5es da B\xC3\xADblia"
+- - Install...
   - Instalar...
-- 
-  - File %s is not a valid Bible file.
-  - Arquivo %s não é um arquivo de Bíblia válido.
-- 
-  - Genesis
-  - Gênesis
-- 
-  - Exodus
-  - "Êxodo"
-- 
-  - Leviticus
-  - Levítico
-- 
-  - Numbers
-  - Números
-- 
-  - Deuteronomy
-  - Deutoronômio
-- 
-  - Joshua
-  - Josué
-- 
-  - Judges
-  - Juízes
-- 
-  - Ruth
+- - File %s is not a valid Bible file.
+  - "Arquivo %s n\xC3\xA3o \xC3\xA9 um arquivo de B\xC3\xADblia v\xC3\xA1lido."
+- - Genesis
+  - "G\xC3\xAAnesis"
+- - Exodus
+  - "\xC3\x8Axodo"
+- - Leviticus
+  - "Lev\xC3\xADtico"
+- - Numbers
+  - "N\xC3\xBAmeros"
+- - Deuteronomy
+  - "Deutoron\xC3\xB4mio"
+- - Joshua
+  - "Josu\xC3\xA9"
+- - Judges
+  - "Ju\xC3\xADzes"
+- - Ruth
   - Rute
-- 
-  - 1 Samuel
-  - 1ª Samuel
-- 
-  - 2 Samuel
-  - 2ª Samuel
-- 
-  - 1 Kings
-  - 1ª Reis
-- 
-  - 2 Kings
-  - 1ª Reis
-- 
-  - 1 Chronicles
-  - 1ª Crônicas
-- 
-  - 2 Chronicles
-  - 2ª Crônicas
-- 
-  - Ezra
+- - 1 Samuel
+  - "1\xC2\xAA Samuel"
+- - 2 Samuel
+  - "2\xC2\xAA Samuel"
+- - 1 Kings
+  - "1\xC2\xAA Reis"
+- - 2 Kings
+  - "1\xC2\xAA Reis"
+- - 1 Chronicles
+  - "1\xC2\xAA Cr\xC3\xB4nicas"
+- - 2 Chronicles
+  - "2\xC2\xAA Cr\xC3\xB4nicas"
+- - Ezra
   - Esdras
-- 
-  - Nehemiah
+- - Nehemiah
   - Neemias
-- 
-  - Esther
+- - Esther
   - Ester
-- 
-  - Job
-  - Jó
-- 
-  - Psalms
+- - Job
+  - "J\xC3\xB3"
+- - Psalms
   - Salmos
-- 
-  - Proverbs
-  - Provérbios
-- 
-  - Ecclesiastes
+- - Proverbs
+  - "Prov\xC3\xA9rbios"
+- - Ecclesiastes
   - Eclesiastes
-- 
-  - Song of Solomon
+- - Song of Solomon
   - Cantares
-- 
-  - Isaiah
-  - Isaías
-- 
-  - Jeremiah
+- - Isaiah
+  - "Isa\xC3\xADas"
+- - Jeremiah
   - Jeremias
-- 
-  - Lamentations
-  - Lamentações
-- 
-  - Ezekiel
+- - Lamentations
+  - "Lamenta\xC3\xA7\xC3\xB5es"
+- - Ezekiel
   - Ezequiel
-- 
+- - Daniel
   - Daniel
-  - Daniel
-- 
-  - Hosea
-  - Oséias
-- 
+- - Hosea
+  - "Os\xC3\xA9ias"
+- - Joel
   - Joel
-  - Joel
-- 
-  - Amos
-  - Amós
-- 
-  - Obadiah
+- - Amos
+  - "Am\xC3\xB3s"
+- - Obadiah
   - Obadias
-- 
-  - Jonah
+- - Jonah
   - Jonas
-- 
-  - Micah
-  - Miquéias
-- 
-  - Nahum
+- - Micah
+  - "Miqu\xC3\xA9ias"
+- - Nahum
   - Naum
-- 
-  - Habakkuk
+- - Habakkuk
   - Habacuque
-- 
-  - Zephenaiah
+- - Zephenaiah
   - Sofonias
-- 
-  - Haggai
+- - Haggai
   - Ageu
-- 
-  - Zechariah
+- - Zechariah
   - Zacarias
-- 
-  - Malachi
+- - Malachi
   - Malaquias
-- 
-  - Matthew
+- - Matthew
   - Mateus
-- 
-  - Mark
+- - Mark
   - Marcos
-- 
-  - Luke
+- - Luke
   - Lucas
-- 
-  - John
-  - João
-- 
-  - Acts
+- - John
+  - "Jo\xC3\xA3o"
+- - Acts
   - Atos
-- 
-  - Romans
+- - Romans
   - Romanos
-- 
-  - 1 Corinthians
-  - 1ª Coríntios
-- 
-  - 2 Corinthians
-  - 2ª Coríntios
-- 
-  - Galatians
-  - Gálatas
-- 
-  - Ephesians
-  - Efésios
-- 
-  - Philippians
+- - 1 Corinthians
+  - "1\xC2\xAA Cor\xC3\xADntios"
+- - 2 Corinthians
+  - "2\xC2\xAA Cor\xC3\xADntios"
+- - Galatians
+  - "G\xC3\xA1latas"
+- - Ephesians
+  - "Ef\xC3\xA9sios"
+- - Philippians
   - Filipenses
-- 
-  - Colossians
+- - Colossians
   - Colossenses
-- 
-  - 1 Thessalonians
-  - 1ª Tessalonicenses
-- 
-  - 2 Thessalonians
-  - 2ª Tessalonicenses
-- 
-  - 1 Timothy
-  - 1ª Timóteo
-- 
-  - 2 Timothy
-  - 2ª Timóteo
-- 
-  - Titus
+- - 1 Thessalonians
+  - "1\xC2\xAA Tessalonicenses"
+- - 2 Thessalonians
+  - "2\xC2\xAA Tessalonicenses"
+- - 1 Timothy
+  - "1\xC2\xAA Tim\xC3\xB3teo"
+- - 2 Timothy
+  - "2\xC2\xAA Tim\xC3\xB3teo"
+- - Titus
   - Tito
-- 
-  - Philemon
+- - Philemon
   - Filemon
-- 
-  - Hebrews
+- - Hebrews
   - Hebreus
-- 
-  - James
+- - James
   - Tiago
-- 
-  - 1 Peter
-  - 1ª Pedro
-- 
-  - 2 Peter
-  - 2ª Pedro
-- 
-  - 1 John
-  - 1 João
-- 
-  - 2 John
-  - 2ª João
-- 
-  - 3 John
-  - 3ª João
-- 
-  - Jude
+- - 1 Peter
+  - "1\xC2\xAA Pedro"
+- - 2 Peter
+  - "2\xC2\xAA Pedro"
+- - 1 John
+  - "1 Jo\xC3\xA3o"
+- - 2 John
+  - "2\xC2\xAA Jo\xC3\xA3o"
+- - 3 John
+  - "3\xC2\xAA Jo\xC3\xA3o"
+- - Jude
   - Judas
-- 
-  - Revelation
+- - Revelation
   - Apocalipse
-- 
-  - Book
+- - Book
   - Livro
-- 
-  - File
+- - File
   - Arquivo
-- 
-  - Exit
+- - Exit
   - Sair
