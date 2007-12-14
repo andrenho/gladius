@@ -1,5 +1,4 @@
 require 'net/http'
-require 'zip/zipfilesystem'
 
 class Download < Gtk::Window
 
@@ -109,11 +108,15 @@ class Download < Gtk::Window
 		yaml = ''
 		begin
 #			Timeout::timeout(5) do 
+				puts 'Resolving...'
 				http = Net::HTTP.new('gladius.googlecode.com')
 				http.open_timeout = 5
 				http.read_timeout = 5
+				puts 'Starting...'
 				http.start
+				puts 'Getting file'
 				resp = http.get('/svn/trunk/data/modules.yaml')
+				puts 'File got'
 				yaml = resp.body
 				records = YAML::load(yaml)
 #			end

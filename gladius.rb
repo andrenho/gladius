@@ -78,7 +78,23 @@ rescue LoadError
 	libraries_ok = false
 end
 
+begin
+	require 'zip/zipfilesystem'
+rescue LoadError
+	$stderr.puts "You need RubyZip to run this application.\n" +
+		         "You can get it in </http://rubyzip.sourceforge.net/>."
+	libraries_ok = false
+end
+
 exit if not libraries_ok
+
+# 
+# This corrects a bug in ruby 1.8
+#
+if OS != :win32 and IMPL != :cygwin
+	require 'resolv-replace'
+end
+
 
 #
 # Set global variables
