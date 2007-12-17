@@ -56,14 +56,10 @@ class Download < Gtk::Window
 
 		@downloading_frame.show_all
 		self.show
-		self.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
-
-		Gtk.main_iteration while Gtk.events_pending?
 
 		Thread.abort_on_exception = true
 		Thread.new do 
 			get_modules
-			self.window.cursor = nil
 		end
 	end
 
@@ -105,22 +101,14 @@ class Download < Gtk::Window
 	private :build_download_tree
 
 	def get_modules
+		self.window.cursor = Gdk::Cursor.new(Gdk::Cursor::WATCH)
+		Gtk.main_iteration while Gtk.events_pending?
+
 		yaml = ''
 		begin
-#			Timeout::timeout(5) do 
-				puts 'Resolving...'
-				http = Net::HTTP.new('gladius.googlecode.com')
-				http.open_timeout = 5
-				http.read_timeout = 5
-				puts 'Starting...'
-				http.start
-				puts 'Getting file'
-				resp = http.get('/svn/trunk/data/modules.yaml')
-				puts 'File got'
-				yaml = resp.body
-				records = YAML::load(yaml)
-#			end
-		rescue Timeout::Error
+			yaml = Connection.read('gladius.googlecode.com', '/svn/trunk/data/modules.yaml')
+			records = YAML::load(yaml)
+		rescue
 			Util.warning(_('Sorry! An internet connection could not be established.'))
 			self.destroy
 		else
@@ -154,7 +142,7 @@ class Download < Gtk::Window
 			end
 
 			@download_options.expand_all
-
+			self.window.cursor = nil if self.window != nil
 		end
 	end
 
@@ -185,6 +173,18 @@ class Download < Gtk::Window
 		# Downloads
 		@treestore.each do |model, path, iter|
 			if iter[CHECK]
+				
+				# Download
+				temp = ENV['temp']
+				temp = '.' if temp == nil
+				filename = temp + '/' + iter[FILE].scan(/.*\/(.*)/)[0][0]
+				Connection.download(
+					'gladius.googlecode.com',
+					iter[FILE],
+					filename,
+					iter[SIZE],
+					iter, PROGRESS)
+=begin
 				sz = 0
 				filename = iter[FILE].scan(/.*\/(.*)/)[0][0]
 				open("#{ENV['TEMP']}#{filename}", 'wb') do |file|
@@ -196,11 +196,12 @@ class Download < Gtk::Window
 						 end
 					end
 				end
+=end
 
 				# Install
 				bible_filename = ''
 				iter[PROGRESS_TEXT] = _('Unpacking')
-				Zip::ZipFile.open("#{ENV['TEMP']}#{filename}") do |zip|
+				Zip::ZipFile.open("#{temp}/#{filename}") do |zip|
 					zip.dir.foreach('/') do |file|
 						open("#{HOME}/#{file}", 'wb') do |f|
 							f.write(zip.file.read(file))
@@ -208,7 +209,7 @@ class Download < Gtk::Window
 						end
 					end
 				end
-				File.delete("#{ENV['TEMP']}#{filename}")
+				File.delete("#{temp}/#{filename}")
 				iter[PROGRESS_TEXT] = _('Done')
 				iter[CHECK] = false
 
