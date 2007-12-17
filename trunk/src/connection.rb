@@ -5,7 +5,13 @@ require 'net/http'
 
 if $OpSys != :win32
 	require 'resolv-replace'
+else
+	def win32_resolve(address)
+		return '127.0.0.1'
+	end
 end
+
+puts win32_resolve('gladius.googlecode.com')
 
 class Connection
 	
