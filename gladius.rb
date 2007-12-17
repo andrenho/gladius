@@ -49,6 +49,10 @@ else
 	IMPL = :unknown
 end
 
+if OS == :win32 or IMPL == :cygwin
+	$OpSys = :win32
+end
+
 #
 # Load libraries
 #
@@ -87,13 +91,6 @@ rescue LoadError
 end
 
 exit if not libraries_ok
-
-# 
-# This corrects a bug in ruby 1.8
-#
-if OS != :win32 and IMPL != :cygwin
-	require 'resolv-replace'
-end
 
 
 #
@@ -151,6 +148,7 @@ require "#{SRC}/books"
 require "#{SRC}/bookmarks"
 require "#{SRC}/copyverses"
 require "#{SRC}/properties"
+require "#{SRC}/connection"
 require "#{I18N}/i18n"
 
 # 

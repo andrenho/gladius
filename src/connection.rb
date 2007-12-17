@@ -1,40 +1,54 @@
-require 'socket'
+require 'gtk2'
+require 'net/http'
+
+# $OpSys = :win32
+
+if $OpSys != :win32
+	require 'resolv-replace'
+end
 
 class Connection
 	
-	def initialize
+	def Connection.read(host, path)
+		if $OpSys != :win32
+			ip = host
+		else
+			ip = host # TODO win32
+		end
+		http = Net::HTTP.new(ip)
+		http.open_timeout = 20
+		http.read_timeout = 40
+		http.start
+		resp = http.get(path, { 'Host' => host })
+		return resp.body
 	end
-	
-	def download(host, address)
-		sock = TCPSocket.new(host, 80)
-		sock.puts "GET #{address} HTTP/1.1"
-		sock.puts "Host: #{host}:80"
-		sock.puts "Connection: close"
-		sock.puts ""
 
-		# Get headers
-		headers = ""
-		while (t = sock.gets.chop)
-			headers += t
-			break if t == ""
+	def Connection.download(host, path, file, size=0.0, progress=nil, n_iter=nil)
+		if $OpSys != :win32
+			ip = host
+		else
+			ip = host # TODO win32
 		end
-		
-		# Get data
-		data = ""
-		i = 0
-		while (t = sock.getc) != nil
-			data += t.chr
-			i += 1#t.length
-			# p i
+		sz = 0.0
+		open(file, 'wb') do |f|
+			http = Net::HTTP.new(ip)
+			http.open_timeout = 30
+			http.read_timeout = 60
+			http.start
+			http.get(path, { 'Host' => host }) do |r|
+				f.write(r)
+				if progress.class == Gtk::ProgressBar
+					progress.fraction = (sz * 100 / size)
+				elsif progress.class == Gtk::TreeIter
+					progress[n_iter] = (sz * 100 / size)
+				end
+				sz += r.length
+			end
 		end
-		sock.close
-
-		return data
 	end
 
 end
 
-c = Connection.new
-# puts c.download('gladius.googlecode.com', '/svn/trunk/data/modules.yaml')
-$stderr.puts c.download('gladius.googlecode.com', '/files/en-kjv.zip')
+#puts Connection.read('gladius.googlecode.com', '/svn/trunk/data/modules.yaml')
+# Connection.download('gladius.googlecode.com', '/files/en-kjv.zip', 'en-kjv.zip')
 # c.download('www.yahoo.com.br', '/index.html')
