@@ -6,13 +6,13 @@
   type: bible
   language: en
   name: King James Version
-  file: '/files/kjv.zip'
+  file: '/files/en-kjv.zip'
   version: '1.0'
   size: 1882481
 -
   type: bible
   language: pt-Br
   name: 'João Ferreira de Almeida (RA)'
-  file: '/files/jfa.zip'
+  file: '/files/ptbr-jfa.zip'
   version: '1.0'
   size: 1932152
