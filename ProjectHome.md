@@ -1,0 +1,1 @@
+A Bible study software written in ruby.
